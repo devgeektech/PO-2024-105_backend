@@ -16,11 +16,11 @@ const controller_1 = require("./controller");
 const config_1 = __importDefault(require("config"));
 const check_1 = require("./middleware/check");
 const basePath = config_1.default.get("BASE_PATH");
-const currentPath = "auth";
+const currentPath = basePath + "auth";
 const adminPath = '/admin/';
 const memberPath = '/member/';
-const memberPathURL = basePath + currentPath + memberPath;
-const adminPathURL = basePath + currentPath + adminPath;
+const memberPathURL = currentPath + memberPath;
+const adminPathURL = currentPath + adminPath;
 exports.default = [
     //***********************   ADMIN   *************************//
     //  login  //
@@ -41,6 +41,17 @@ exports.default = [
         handler: [
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
                 const result = yield (0, controller_1.forgotPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  verify link  //
+    {
+        path: currentPath + '/resetLink/:id',
+        method: "get",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.verifyResetLink)(req.params, req.query, next);
                 res.status(200).send(result);
             }),
         ],

@@ -12,8 +12,11 @@ export const MESSAGES = {
     USER_NOT_FOUND: "User not found",
     USER_DELETED: "User deleted successfully",
     OTP_REQUIRED: "Please enter otp",
-    OTP_VERIFIED: "OTP verified.",
     INVALID_CREDENTIAL: "Invalid credentials",
+    INVALID_LINK: "Invalid link",
+    LINK_EXPIRED: "Link expired",
+    LINK_VERIFIED: "Link verified",
+
     ADMIN: {
       ALREADY_EXIST: "Admin already exists please login with credentials",
     }

@@ -10,6 +10,7 @@ import multer from "multer";
 import path from "path";
 import 'dotenv/config';
 const { Server } = require("socket.io");
+import { defaultCreates } from "./middleware/defaultCreate";
 
 const router = express();
 router.set('views', path.join(__dirname, 'views'));
@@ -33,6 +34,7 @@ router.use(express.static('./temp'))
 applyMiddleware(middleware, router);
 applyRoutes(routes, router);
 applyMiddleware(errorHandlers, router);
+defaultCreates();
 
 const PORT = config.get("MONGO_CRED.PORT") || 9000;
 export const server = http.createServer(router);

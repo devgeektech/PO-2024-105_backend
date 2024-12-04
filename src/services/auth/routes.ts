@@ -4,6 +4,7 @@ import {
   adminLogin,
   createNewPassword,
   forgotPassword,
+  verifyResetLink,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -11,11 +12,11 @@ import {
 import config from "config";
 import { checkLogin, checkAuthenticate, } from "./middleware/check";
 const basePath = config.get("BASE_PATH");
-const currentPath = "auth";
+const currentPath = basePath + "auth";
 const adminPath = '/admin/';
 const memberPath = '/member/';
-const memberPathURL = basePath + currentPath + memberPath;
-const adminPathURL = basePath + currentPath + adminPath;
+const memberPathURL = currentPath + memberPath;
+const adminPathURL = currentPath + adminPath;
 
 
 export default [
@@ -39,6 +40,18 @@ export default [
     handler: [
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await forgotPassword(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  verify link  //
+  {
+    path: currentPath + '/resetLink/:id',
+    method: "get",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await verifyResetLink(req.params, req.query, next);
         res.status(200).send(result);
       },
     ],

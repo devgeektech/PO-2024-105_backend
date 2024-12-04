@@ -10,6 +10,7 @@ import { DEFAULT_ADMIN } from "../../constants";
 import { MailerUtilities } from "../../utils/MailerUtilities";
 import { generateVerificationLink } from "../../utils";
 import { MESSAGES } from "../../constants/messages";
+import { NextFunction } from "express";
 
 //********************  admin controller  ***********************************//
 export const adminSignUp = async () => {
@@ -74,6 +75,95 @@ export const adminLogin = async (bodyData: any, next: any) => {
   }
 };
 
+//  Forgot password  //
+export const forgotPassword = async (body: any, next: any) => {
+  try {
+    let userRes: any = await UserModel.findOne({
+      email: body.email,
+      isDeleted: false,
+    });
+    if (userRes) {
+      let randomOTP = Utilities.genNumericCode(6);
+      console.log('randomOTP >>>> ', randomOTP, process.env.psswordResetBaseUrl + 'auth/resetLink/' + userRes._id + '?otp=' + randomOTP);
+
+      // Get email template to send email
+      let messageHtml = await ejs.renderFile(
+        process.cwd() + "/src/views/forgotPassword.ejs",
+        { link: process.env.psswordResetBaseUrl + 'auth/resetLink/' + userRes._id + '?otp=' + randomOTP },
+        { async: true }
+      );
+      let mailResponse = MailerUtilities.sendSendgridMail({
+        recipient_email: [body.email],
+        subject: "Password reset link",
+        text: messageHtml,
+      });
+
+      userRes['otp'] = randomOTP;
+      userRes['otpVerified'] = false;
+      userRes['otpExipredAt'] = moment().add(10, "m");
+      await userRes.save();
+
+      return Utilities.sendResponsData({
+        code: 200,
+        message: "Mail is sent with link",
+      });
+    } else {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+//  verify Reset sLink  //
+export const verifyResetLink = async (params: any, query: any, next: NextFunction) => {
+  try {
+    let user = await UserModel.findById(params.id);
+    if(!user){
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.INVALID_LINK,
+        })
+      );
+    }
+    if(user.otp != query.otp){
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.INVALID_LINK,
+        })
+      );
+    }    
+    if(moment().isAfter(moment(user.otpExipredAt))){
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.LINK_EXPIRED,
+        })
+      );
+    }
+
+    user.otp = 0;
+    user.otpVerified =true;
+    await user.save();
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.LINK_VERIFIED,
+      data: user
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+
+
 export const adminChangePassword = async (token: any, bodyData: any, next: any) => {
   try {
     const { oldPassword, newPassword } = bodyData;
@@ -116,47 +206,6 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
   }
 };
 
-//  Forgot password  //
-export const forgotPassword = async (body: any, next: any) => {
-  try {
-    let userRes: any = await UserModel.findOne({
-      email: body.email,
-      isDeleted: false,
-    });
-    if (userRes) {
-      let randomOTP = Utilities.genNumericCode(6);
-      // Get email template to send email
-      let messageHtml = await ejs.renderFile(
-        process.cwd() + "/src/views/otpEmail.ejs",
-        { otp: randomOTP },
-        { async: true }
-      );
-      let mailResponse = MailerUtilities.sendSendgridMail({
-        recipient_email: [body.email],
-        subject: "OTP Verification",
-        text: messageHtml,
-      });
-
-      userRes['otp'] = randomOTP,
-        userRes['otpVerified'] = false,
-        userRes['otpExipredAt'] = moment().add(1, "m"),
-        await userRes.save();
-      return Utilities.sendResponsData({
-        code: 200,
-        message: "Mail is sent with link",
-      });
-    } else {
-      throw new HTTP400Error(
-        Utilities.sendResponsData({
-          code: 400,
-          message: config.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
-        })
-      );
-    }
-  } catch (error) {
-    next(error);
-  }
-};
 
 // create new password
 export const createNewPassword = async (body: any, next: any) => {

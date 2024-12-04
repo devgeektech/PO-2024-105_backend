@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.createNewPassword = exports.forgotPassword = exports.adminChangePassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.createNewPassword = exports.adminChangePassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -109,6 +109,80 @@ const adminLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.adminLogin = adminLogin;
+//  Forgot password  //
+const forgotPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let userRes = yield User_1.UserModel.findOne({
+            email: body.email,
+            isDeleted: false,
+        });
+        if (userRes) {
+            let randomOTP = Utilities_1.Utilities.genNumericCode(6);
+            console.log('randomOTP >>>> ', randomOTP, process.env.psswordResetBaseUrl + 'auth/resetLink/' + userRes._id + '?otp=' + randomOTP);
+            // Get email template to send email
+            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/forgotPassword.ejs", { link: process.env.psswordResetBaseUrl + 'auth/resetLink/' + userRes._id + '?otp=' + randomOTP }, { async: true });
+            let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+                recipient_email: [body.email],
+                subject: "Password reset link",
+                text: messageHtml,
+            });
+            userRes['otp'] = randomOTP;
+            userRes['otpVerified'] = false;
+            userRes['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
+            yield userRes.save();
+            return Utilities_1.Utilities.sendResponsData({
+                code: 200,
+                message: "Mail is sent with link",
+            });
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.forgotPassword = forgotPassword;
+//  verify Reset sLink  //
+const verifyResetLink = (params, query, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let user = yield User_1.UserModel.findById(params.id);
+        if (!user) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if (user.otp != query.otp) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if ((0, moment_1.default)().isAfter((0, moment_1.default)(user.otpExipredAt))) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.LINK_EXPIRED,
+            }));
+        }
+        user.otp = 0;
+        user.otpVerified = true;
+        yield user.save();
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.LINK_VERIFIED,
+            data: user
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.verifyResetLink = verifyResetLink;
 const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { oldPassword, newPassword } = bodyData;
@@ -147,43 +221,6 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
     }
 });
 exports.adminChangePassword = adminChangePassword;
-//  Forgot password  //
-const forgotPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let userRes = yield User_1.UserModel.findOne({
-            email: body.email,
-            isDeleted: false,
-        });
-        if (userRes) {
-            let randomOTP = Utilities_1.Utilities.genNumericCode(6);
-            // Get email template to send email
-            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/otpEmail.ejs", { otp: randomOTP }, { async: true });
-            let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
-                recipient_email: [body.email],
-                subject: "OTP Verification",
-                text: messageHtml,
-            });
-            userRes['otp'] = randomOTP,
-                userRes['otpVerified'] = false,
-                userRes['otpExipredAt'] = (0, moment_1.default)().add(1, "m"),
-                yield userRes.save();
-            return Utilities_1.Utilities.sendResponsData({
-                code: 200,
-                message: "Mail is sent with link",
-            });
-        }
-        else {
-            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
-                code: 400,
-                message: config_1.default.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
-            }));
-        }
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.forgotPassword = forgotPassword;
 // create new password
 const createNewPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
