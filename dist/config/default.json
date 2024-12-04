@@ -1,0 +1,78 @@
+{
+  "AUTHORIZATION": "authorization",
+  "JWT_SECRET_KEY": "d2h4b2h59fb32b54jnfnsh",
+  "SALT": 10,
+  "BASE_PATH": "/api/v1/",
+  "SOCIAL_TOKEN_PERIOD": "86400",
+  "SITE_URL": "http://57.129.4.191:3000",
+  "VERIFICATION_URL": "http://57.129.4.191:3000/auth/verification",
+  "MONGO_CRED": {
+    "PORT": 9000,
+    "DATABASE": "fitness",
+    "MONGO_USER": "",
+    "MONGO_PASSWORD": "",
+    "MONGO_PATH": "mongodb://localhost:27017"
+  },
+  "PARTNER": {
+    "FIREBASE": {
+      "CREDENTIALS": {
+        "type": "service_account",
+        "project_id": "sports-club-partner",
+        "private_key_id": "6be72d67912b97f93f29646452fe9674ae92ff74",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQD75ucFb1Pr5QsE\nz/z90M1DRGKvwo49Wg5dqqUVpZerAchz8DHmD13WQ8eQarAVM75pM0HqLuLOWX/I\nL3htdIrlDIROflyvYyVrF1tNWMQu63Zh+4/bbuVAfJZGE0kCIhCindhrJ/ispdVP\ntTLDJKzDXTpoaOE99AzpTZoTiCkOO9RhKunBuh1tWGWdwRQGXFbIz0+c8sdeB13j\nRa8KQeWOdsHXXxtc+hlo0yCGbNfXlNDmumqCT/8mhR2o65aZ9Q50ck7se4fn42Eo\nF8LHkPX+DMiU9j6R1qjq3nkqFXmMrVXwFDS+Hw7LExrKnCmgZ+UPSJ3ZJf3TJp/z\n6DTvHLqJAgMBAAECggEAEjokXgcu0z8+532dxKdkzODgQ6/AH1Yae0JXYOw7H+F4\nhdQb5jXXMEN2B6ACpvwYI3BVLQrwuCXvejaeIAxqZvW7hpr73ah+ywOVBJEfW/ZH\negJMB+Cbt8l0DbTESAJbQgsKH4HUS3jR6Ss3NbncAuRmbyrknnkf7ItEEnT8JIaA\nwOVf9Ij82JWzBiytfx1NI8TMdS3b/twV5q1sIgt/lJDCjsK3MXAwOJ0JgQDnqsRH\nOdY1JoKhbYPRKdJ7xYbBsp9rLIbaro8cLxHNM1ZYgHv6Xy06pwyMlsDDH8x7Wwfn\nBjWkDuUdi1lwfHkgajBpUOsUA7F+IAHWvTnMV82z0QKBgQD+v8SldDcwYlx4nim9\nkflGbyn0o0bv2M8G2sPJ6LES+Q2I7mZzWnXDqkqXd3eyczA4dBXmWDxk12VlRIvf\nXV4EaRr7tHQZvDzAorAAlwv5kVMRxu0BgzFgorrqknSQ0CVgXmOB68d9/2+0hNyk\nlMWMaP2k0DbCWyN62fdKFrZDGQKBgQD9I44n26J/6Oyg/RjUdVRAcInfNftFLy2m\nh/QWtDM2wu2ow6dIx7Nk0sUuKsH1tUOopMVFmuigvt8eVy4o8MENygp4IHTmLOdc\nfAoyL5J/Xavy+bQyECqi3wvfDXGEIR+f/3+uDIHn8QDEcihWDiyPJHI8iMaJucfR\nArnQ5MYQ8QKBgQCS38unvPZozf0UidP0+SloQ4VEB7NJa44JHK4PRjp5fuAf15t3\n3GrTUeZJp9Z6K1Fc6wkJUkwXs9xA46FlObaQAm1NO8BIai/4vJOO84cy72eeczuI\nSLR6S7hKr//G0ksKYcErUd4ltdUYlhWESkYPayT6FhXMPrGZDfw2WhvhWQKBgQDN\ngZEF8Lwy5ZE9fVwsF3inu/ViPfvZBd0kxli2GeM+APBaQ0TKxD1yi95ChbnjVR4x\nilsREBrtbSfMBPDXkeTY4f6v2YGt4CSQI69PYOmo9w4Cew/8WL2Ubkm/8rUGlLGM\n/irUzRiliTWbRiZS/rzUFL2dQVkVNLrwhyr9WM0nsQKBgQC9XWElCZ0qwJM1PxSV\njw5APXCjhtR9WA2D95eMNzjY/03O39mmPMcs4yBe/bTogQrRwwywzUZJQu5lpAI7\nQEOdauzrySuJ0pS0ndNRQzAA/WqwXgd0dXgMxgkrXht4TmkLWjOCOy8C72aFcwgU\nxHTKlVkJoaGF/Nbym2kINu//YQ==\n-----END PRIVATE KEY-----\n",
+        "client_email": "firebase-adminsdk-dk4o7@sports-club-partner.iam.gserviceaccount.com",
+        "client_id": "117489541833229100759",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-dk4o7%40sports-club-partner.iam.gserviceaccount.com",
+        "universe_domain": "googleapis.com"
+      },
+      "DATABASE": "https://sports-club-partner-default-rtdb.firebaseio.com/"
+    }
+  },
+  "USER": {
+    "FIREBASE": {
+      "CREDENTIALS": {
+        "type": "service_account",
+        "project_id": "sports-club-e20c5",
+        "private_key_id": "5c4308d8aee9a0874d051f7046b02b0d48405668",
+        "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDfaMNxmyrByW7X\njgRdvxfixmk4Kxi+ez+AgNg6wv4YtWs31zdlbUIMD3sux70KzHFTe9WKCiPS8fZo\nozdfhXQE+rgb5qDW+m6ppbRyjRim8o8oPm0/KfvZllN4PIky1p4EBndD8u4i/1jP\nGZtDeEEQim44OdPI87seSSO3sR9+wfONpxX3Z6A0qGlPRVfGlFZdzdClvhk282k/\n6V0H2GQLZ0LMz0qvmkK7PMKzhqtHyJBpt3NvesPiVQl+XSZz5RLc0H6A5XYAAsfD\n2gtSAQx48tWAstXGnKSAgecoCNJL6FWOthKVuWqPBdRKORF08eaJX0Hyn7e1bSH1\ncs9w6Z0nAgMBAAECggEAFqfTGhQ4M8qvmOBoBPG6BF9GkFGegsKQ4AEw7FSV2/+Z\nzeHfVkPMLNjtDwNmYk/1NhgawZLhqySqblYO6XrpFxAt13Z93Q8sZbvOHse8NkHm\nzpf2EC+7wIcEE+9fom4tPA9DzPo3uAjZAreADUmGn5zKLJ2AoqJE2X9lRd2Kahok\ndmMBMin8q3K95b5Ig3vS36TZHq/Yw9KPkVu+Q+e0/KUrZsrGVYU6l9IfIPr+uUtY\nklV6VGLcTtqXArZOQSboG+Id4tcuNZWYs27pN/StvOqC+DBNCbRYebrA120H/s5P\nFek5GuxGzsU91DmoFXQNlBfnhkSulkWRDVSfXyGjcQKBgQD+OvwRHmeMSrwMjjlZ\n2YPL+spgY1Jc2pW0CaOa2/yWOH8p3f53Li0Xz3Px3NyynAXXUzwXKpApUH/T2tCK\nqu0xGT2sVzxgDtlOb+5JGKEIIX4pbPW9X26vKAQRoIry2Tc2kx/Xt52UovktAtR6\nCoFI1PJZHkH5/g4dNzD8CsHK2wKBgQDg9tu5OkE4c7D9l6uHhr56/+AMW6b/78Rs\nkUgpQ0eMBOYXs6SjuuoLEEX3n6dJUcbPrCqZIpaaz9CD7+vKkYhbr5ydH4b+fiaJ\nFMOYqrQARjB/SmMkzlu2Zu1w/Jh5OUlG4WG6NQhHNLH0pXomgtse+GTCEodPIPxH\n4vCtRjj6pQKBgDf4DF5Ib0t3eIbbGM0rEdTqVXt64jsG9EY6iQYiwCziKzywXsEm\nLU88oK3yjbPUnYSWEniXKj2uNzYQyjB9CNLyV52FZwlOu5CFG9SD04/Sr8+26TLT\nu65cBOlMisqD/5/ILA51of+DEZBTOyvS/DtohiIQgz3iLIFKEUKrq5ZZAoGBALQ2\njQXxGNY0N5Cus4Y59tVprP25Xiqg1GV0bK5Ba0tLkVdjXXyb+2kpfCNGDii6Dd3H\nOci64JLb71oCFI2N0AJCx99GpkmwnQYrUBU4ikG9+JO/73RIq0ePZJ6iezKBJaZW\nXodgfGUuXXByL0wyf35r1atyVFqbPf4IWm00V+jRAoGAWbg0OvduLnSEm7PnwX9f\n4Xkwo3UENwA9fErKvl+jC6o2oZXURDTcXe6lc474Z/cCAFHLZOdl9wddGoxlffkZ\noQTcub9joyzBr4EUfNT35f5csk6UiJNp2L4DoI7MN8svp2yJT3Jbxb3lOaYxtkEN\nAgOWbO7tp+mwdsUbersmAM8=\n-----END PRIVATE KEY-----\n",
+        "client_email": "firebase-adminsdk-embe4@sports-club-e20c5.iam.gserviceaccount.com",
+        "client_id": "100527226572320712683",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-embe4%40sports-club-e20c5.iam.gserviceaccount.com",
+        "universe_domain": "googleapis.com"
+      },
+      "DATABASE": "https://sports-club-e20c5-default-rtdb.firebaseio.com/"
+    }
+  },
+  "AWS": {
+    "BUCKET": {
+      "NAME": "sportsstorage",
+      "REGION": "ap-south-1",
+      "ACCESS_KEY": "AKIAZI2LD22B7WTMEIFP",
+      "SECRET": "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",
+      "ENDPOINT": "https://s3.ap-south-1.amazonaws.com",
+      "IMAGE_URL": "https://sports-clubstorage.s3.ap-south-1.amazonaws.com/"
+    }
+  },
+  "SENDGRID_SETTING": {
+    "API_KEY": "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",
+    "NO_REPLY": {
+      "NAME": "Narender",
+      "EMAIL": "narender@geekinformatic.com"
+    },
+    "SENDER": {
+      "NAME": "Narender",
+      "EMAIL": "narender@geekinformatic.com"
+    },
+    "INFO": {
+      "NAME": "Narender",
+      "EMAIL": "narender@geekinformatic.com"
+    }
+  }
+
+}

@@ -1,0 +1,39 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_PLANS = void 0;
+exports.DEFAULT_PLANS = [
+    {
+        title: "Individual Youth Membership",
+        description: "Aut sunt quaerat sunt aspernatur consequuntur.",
+        type: "individual",
+        planId: "price_1PObkAHNWlYgotwApbhTy3QL",
+        duration: 1,
+        amount: 329,
+        discount: 0,
+        currency: "usd",
+        periodType: "month",
+    },
+    {
+        title: "Family Plan",
+        description: "Tempora amet rem saepe et quos numquam est veritatis.",
+        type: "family",
+        planId: "price_1PObkAHNWlYgotwApbhTy3QL",
+        duration: 1,
+        amount: 280,
+        discount: 10,
+        currency: "usd",
+        periodType: "month",
+    },
+    {
+        title: "Special Plans",
+        description: "Sed beatae non et at.",
+        type: "special",
+        planId: "price_1PObkAHNWlYgotwApbhTy3QL",
+        duration: 1,
+        amount: 189,
+        discount: 10,
+        currency: "usd",
+        periodType: "month",
+    },
+];
+//# sourceMappingURL=plans.js.map
