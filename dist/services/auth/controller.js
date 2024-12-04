@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.createNewPassword = exports.adminChangePassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -183,6 +183,42 @@ const verifyResetLink = (params, query, next) => __awaiter(void 0, void 0, void 
     }
 });
 exports.verifyResetLink = verifyResetLink;
+// create new password
+const createNewPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let userRes = yield User_1.UserModel.findOne({
+            email: body.email,
+            isDeleted: false,
+        });
+        if (userRes) {
+            const pass = yield Utilities_1.Utilities.cryptPassword(body.password);
+            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/changePassword.email.ejs", { name: userRes.firstName.charAt(0).toUpperCase() + userRes.firstName.slice(1) }, { async: true });
+            yield MailerUtilities_1.MailerUtilities.sendSendgridMail({
+                recipient_email: [userRes.email],
+                subject: "Change Password",
+                text: messageHtml,
+            });
+            userRes.password = pass;
+            yield userRes.save();
+            return Utilities_1.Utilities.sendResponsData({
+                code: 200,
+                message: messages_1.MESSAGES.PASSWORD_UPDATED,
+                data: userRes
+            });
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.createNewPassword = createNewPassword;
+//  change Password  //
 const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { oldPassword, newPassword } = bodyData;
@@ -199,20 +235,20 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
                 adminRes.save();
                 return Utilities_1.Utilities.sendResponsData({
                     code: 200,
-                    message: "Password updated successfully",
+                    message: messages_1.MESSAGES.PASSWORD_UPDATED,
                 });
             }
             else {
                 throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                     code: 400,
-                    message: config_1.default.get("ERRORS.ADMIN.INVALID_PASSWORD"),
+                    message: messages_1.MESSAGES.INVALID_PASSWORD,
                 }));
             }
         }
         else {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
-                message: config_1.default.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
             }));
         }
     }
@@ -221,56 +257,7 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
     }
 });
 exports.adminChangePassword = adminChangePassword;
-// create new password
-const createNewPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        let userRes = yield User_1.UserModel.findOne({
-            email: body.email,
-            isDeleted: false,
-        });
-        if (userRes) {
-            let currentDateTime = (0, moment_1.default)();
-            if (currentDateTime.diff(userRes.otpExipredAt, "m") > 1) {
-                throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
-                    code: 400,
-                    message: config_1.default.get("ERRORS.OTP_ERRORS.OTP_EXPIRED"),
-                }));
-            }
-            if (userRes['otp'] !== body['otp']) {
-                throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
-                    code: 400,
-                    message: config_1.default.get("ERRORS.COMMON_ERRORS.INVALID_OTP"),
-                }));
-            }
-            else {
-                const pass = yield Utilities_1.Utilities.cryptPassword(body.password);
-                let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/changePassword.email.ejs", { name: userRes.firstName.charAt(0).toUpperCase() + userRes.firstName.slice(1) }, { async: true });
-                yield MailerUtilities_1.MailerUtilities.sendSendgridMail({
-                    recipient_email: [userRes.email],
-                    subject: "Change Password",
-                    text: messageHtml,
-                });
-                userRes.password = pass;
-                userRes.save();
-                return Utilities_1.Utilities.sendResponsData({
-                    code: 200,
-                    message: "Password Changed Successfull",
-                });
-            }
-        }
-        else {
-            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
-                code: 400,
-                message: config_1.default.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
-            }));
-        }
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.createNewPassword = createNewPassword;
-//**************************************************************************
+//***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {

@@ -60,7 +60,7 @@ export default [
   // reset password  //
   {
     path: adminPathURL + 'resetPassword',
-    method: "post",
+    method: "put",
     handler: [
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await createNewPassword(req.body, next);
@@ -69,10 +69,10 @@ export default [
     ],
   },
 
-  //  changePassword  //
+  //  change Password  //
   {
     path: adminPathURL + "changePassword",
-    method: "post",
+    method: "put",
     handler: [
       checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {

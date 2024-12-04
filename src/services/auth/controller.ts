@@ -124,7 +124,7 @@ export const forgotPassword = async (body: any, next: any) => {
 export const verifyResetLink = async (params: any, query: any, next: NextFunction) => {
   try {
     let user = await UserModel.findById(params.id);
-    if(!user){
+    if (!user) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
@@ -132,15 +132,15 @@ export const verifyResetLink = async (params: any, query: any, next: NextFunctio
         })
       );
     }
-    if(user.otp != query.otp){
+    if (user.otp != query.otp) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
           message: MESSAGES.INVALID_LINK,
         })
       );
-    }    
-    if(moment().isAfter(moment(user.otpExipredAt))){
+    }
+    if (moment().isAfter(moment(user.otpExipredAt))) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
@@ -150,7 +150,7 @@ export const verifyResetLink = async (params: any, query: any, next: NextFunctio
     }
 
     user.otp = 0;
-    user.otpVerified =true;
+    user.otpVerified = true;
     await user.save();
     return Utilities.sendResponsData({
       code: 200,
@@ -162,8 +162,47 @@ export const verifyResetLink = async (params: any, query: any, next: NextFunctio
   }
 }
 
+// create new password
+export const createNewPassword = async (body: any, next: any) => {
+  try {
+    let userRes: any = await UserModel.findOne({
+      email: body.email,
+      isDeleted: false,
+    });
+    if (userRes) {
+      const pass = await Utilities.cryptPassword(body.password);
+      let messageHtml = await ejs.renderFile(
+        process.cwd() + "/src/views/changePassword.email.ejs",
+        { name: userRes.firstName.charAt(0).toUpperCase() + userRes.firstName.slice(1) },
+        { async: true }
+      );
+      await MailerUtilities.sendSendgridMail({
+        recipient_email: [userRes.email],
+        subject: "Change Password",
+        text: messageHtml,
+      });
 
+      userRes.password = pass;
+      await userRes.save();
+      return Utilities.sendResponsData({
+        code: 200,
+        message: MESSAGES.PASSWORD_UPDATED,
+        data: userRes
+      });
+    } else {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+  } catch (error) {
+    next(error)
+  }
+};
 
+//  change Password  //
 export const adminChangePassword = async (token: any, bodyData: any, next: any) => {
   try {
     const { oldPassword, newPassword } = bodyData;
@@ -183,13 +222,13 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
         adminRes.save();
         return Utilities.sendResponsData({
           code: 200,
-          message: "Password updated successfully",
+          message: MESSAGES.PASSWORD_UPDATED,
         });
       } else {
         throw new HTTP400Error(
           Utilities.sendResponsData({
             code: 400,
-            message: config.get("ERRORS.ADMIN.INVALID_PASSWORD"),
+            message: MESSAGES.INVALID_PASSWORD,
           })
         );
       }
@@ -197,7 +236,7 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
-          message: config.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
+          message: MESSAGES.USER_NOT_EXISTS,
         })
       );
     }
@@ -207,67 +246,7 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
 };
 
 
-// create new password
-export const createNewPassword = async (body: any, next: any) => {
-  try {
-    let userRes: any = await UserModel.findOne({
-      email: body.email,
-      isDeleted: false,
-    });
-    if (userRes) {
-      let currentDateTime = moment();
-      if (currentDateTime.diff(userRes.otpExipredAt, "m") > 1) {
-        throw new HTTP400Error(
-          Utilities.sendResponsData({
-            code: 400,
-            message: config.get("ERRORS.OTP_ERRORS.OTP_EXPIRED"),
-          })
-        );
-      }
-      if (userRes['otp'] !== body['otp']) {
-        throw new HTTP400Error(
-          Utilities.sendResponsData({
-            code: 400,
-            message: config.get("ERRORS.COMMON_ERRORS.INVALID_OTP"),
-          })
-        );
-      } else {
-        const pass = await Utilities.cryptPassword(body.password);
-        let messageHtml = await ejs.renderFile(
-          process.cwd() + "/src/views/changePassword.email.ejs",
-          { name: userRes.firstName.charAt(0).toUpperCase() + userRes.firstName.slice(1) },
-          { async: true }
-        );
-        await MailerUtilities.sendSendgridMail({
-          recipient_email: [userRes.email],
-          subject: "Change Password",
-          text: messageHtml,
-        });
-
-        userRes.password = pass;
-        userRes.save();
-        return Utilities.sendResponsData({
-          code: 200,
-          message: "Password Changed Successfull",
-        });
-      }
-    } else {
-      throw new HTTP400Error(
-        Utilities.sendResponsData({
-          code: 400,
-          message: config.get("ERRORS.COMMON_ERRORS.USER_NOT_EXIST"),
-        })
-      );
-    }
-  } catch (error) {
-    next(error)
-  }
-};
-
-
-
-
-//**************************************************************************
+//***********************   MEMBER   *************************//
 //  common api for login and ragister
 export const memberLogin = async (bodyData: any, next: any) => {
   try {

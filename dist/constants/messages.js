@@ -6,8 +6,6 @@ exports.MESSAGES = {
     LOGOUT_SUCCESS: "Logout successfully",
     VERIFY_SUCCESS: "Verified successfully",
     USER_EXISTS: "User exists",
-    INVALID_OTP: "Invalid OTP",
-    INVALID_PASSWORD: "Invalid password",
     ALREADY_VERIFIED: "Account already verified",
     USER_NOT_EXISTS: "User not exists",
     SUCCESS: "Success",
@@ -19,6 +17,8 @@ exports.MESSAGES = {
     INVALID_LINK: "Invalid link",
     LINK_EXPIRED: "Link expired",
     LINK_VERIFIED: "Link verified",
+    PASSWORD_UPDATED: "Password updated successfully",
+    INVALID_PASSWORD: "Invalid password",
     ADMIN: {
         ALREADY_EXIST: "Admin already exists please login with credentials",
     }

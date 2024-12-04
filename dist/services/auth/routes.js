@@ -59,7 +59,7 @@ exports.default = [
     // reset password  //
     {
         path: adminPathURL + 'resetPassword',
-        method: "post",
+        method: "put",
         handler: [
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
                 const result = yield (0, controller_1.createNewPassword)(req.body, next);
@@ -67,10 +67,10 @@ exports.default = [
             }),
         ],
     },
-    //  changePassword  //
+    //  change Password  //
     {
         path: adminPathURL + "changePassword",
-        method: "post",
+        method: "put",
         handler: [
             check_1.checkAuthenticate,
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
