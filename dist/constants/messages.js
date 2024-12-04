@@ -21,6 +21,10 @@ exports.MESSAGES = {
     INVALID_PASSWORD: "Invalid password",
     ADMIN: {
         ALREADY_EXIST: "Admin already exists please login with credentials",
+        WELLNESS_TYPE_EXISTS: "This wellness type already exists",
+        WELLNESS_TYPE_CREATED: "This wellness type created successfully",
+        WELLNESS_TYPE_NOT_EXISTS: "This wellness type do not exists",
+        WELLNESS_TYPE_UPDATED: "This wellness type updated successfully",
     }
 };
 //# sourceMappingURL=messages.js.map

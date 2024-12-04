@@ -25,3 +25,5 @@ export const PLAN_TYPES=[ "individual", "family", "special"];
 export const ROOM_TYPES=[ "ground"];
 
 export const ADVERTING_STATUS = ["available", "booked"];
+
+export const WELLNESS_BUSINESS_TYPE = ["", "gym", "studio", "wellness services"];
