@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import { PartnerModel } from "../../../db/partner";
 import { PartnerLocationModel } from "../../../db/partnerLocations";
 
-export const addPartnerWithLocation = async (token: any, bodyData: any, next: any) => {
+export const addPartnerWithLocation = async (bodyData: any, next: any) => {
   try {
     // Validate if email is already in use
     const isEmailExist = await PartnerModel.findOne({
@@ -34,11 +34,10 @@ export const addPartnerWithLocation = async (token: any, bodyData: any, next: an
       image: bodyData.image,
       businessWebsite: bodyData.businessWebsite,
       wellnessTypeId: bodyData.wellnessTypeId,
-      locations: bodyData.locations,
-      otp: bodyData.otp
+      otp: bodyData.otp,
+      approved: false
     };
     const partner = await PartnerModel.create(partnerData);
-
     // Create partner location(s)
     const locationPromises = bodyData.locations.map((location: any) => {
       return PartnerLocationModel.create({
@@ -48,7 +47,7 @@ export const addPartnerWithLocation = async (token: any, bodyData: any, next: an
         state: location.state,
         phone: location.phone,
         images: location.images,
-        sevices: location.servivces,
+        services: location.services,
         date: new Date(location.date),
         startTime: location.startTime, // 09:00
         endTime: location.endTime, // 03:00
@@ -56,8 +55,15 @@ export const addPartnerWithLocation = async (token: any, bodyData: any, next: an
       });
     });
 
-    const locations = await Promise.all(locationPromises);
+    let locations = await Promise.all(locationPromises);
 
+    let loc = []
+    loc = locations.map((item)=>{
+      return item._id
+    })
+
+    partner.locations = loc;
+    partner.save()
     // Return success response
     return Utilities.sendResponsData({
       code: 200,
@@ -69,13 +75,10 @@ export const addPartnerWithLocation = async (token: any, bodyData: any, next: an
   }
 };
 
-export const editPartnerWithLocation = async (token: any, partnerId: string, bodyData: any, next: any) => {
+export const editPartnerWithLocation = async (partnerId: string, bodyData: any, next: any) => {
   try {
-    // Decode token to validate the user
-    const decoded: any = await Utilities.getDecoded(token);
-
     // Validate if partner exists
-    const partner = await PartnerModel.findOne({ _id: partnerId, isDeleted: false });
+    const partner = await PartnerModel.findOne({ _id: new mongoose.Types.ObjectId(partnerId), isDeleted: false });
     if (!partner) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
@@ -92,6 +95,10 @@ export const editPartnerWithLocation = async (token: any, partnerId: string, bod
       email: bodyData.email || partner.email,
       phone: bodyData.phone || partner.phone,
       gender: bodyData.gender || partner.gender,
+      image: bodyData.image || partner.image,
+      businessWebsite: bodyData.businessWebsite || partner.businessWebsite,
+      wellnessTypeId: bodyData.wellnessTypeId || partner.wellnessTypeId,
+      approved: bodyData.approved || partner.approved
     };
     await PartnerModel.findByIdAndUpdate(partnerId, updatedPartnerData, { new: true });
 
@@ -109,14 +116,25 @@ export const editPartnerWithLocation = async (token: any, partnerId: string, bod
           state: location.state,
           phone: location.phone,
           images: location.images,
-          createdBy: new mongoose.Types.ObjectId(decoded.id),
+          services: location.services,
+          date: new Date(location.date),
+          startTime: location.startTime, // 09:00
+          endTime: location.endTime, // 03:00
+          googleBussinessPageLink: location.googleBussinessPageLink,
         });
       });
 
-      await Promise.all(locationPromises);
+      let locationResponse = await Promise.all(locationPromises);
+
+      let loc = []
+      loc = locationResponse.map((item)=>{
+        return item._id
+      })
+ 
+      partner.locations = loc;
+      partner.save()
     }
 
-    // Return success response
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.ADMIN.PARTNER_UPDATED,
@@ -128,15 +146,15 @@ export const editPartnerWithLocation = async (token: any, partnerId: string, bod
 
 export const getAllPartners = async (token: any, query: any, next: any) => {
   try {
-    // Decode token for validation
-    await Utilities.getDecoded(token);
+    let skip = parseInt(query.skip) || 0;
+    let limit = parseInt(query.limit) || 10;
 
     // Fetch partners with optional filtering
     const filters: any = { isDeleted: false };
     if (query.name) filters.name = { $regex: query.name, $options: "i" };
     if (query.email) filters.email = query.email;
 
-    const partners = await PartnerModel.find(filters).lean();
+    const partners = await PartnerModel.find(filters).skip(skip).limit(limit).populate('locations').lean();
 
     // Fetch locations for each partner
     const partnerDetails = await Promise.all(
@@ -151,6 +169,78 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
       code: 200,
       message: MESSAGES.ADMIN.PARTNERS_FETCHED,
       data: partnerDetails,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPartnerById = async (partnerId: string, next: any) => {
+  try {
+    // Validate Partner ID
+    if (!partnerId) {
+      throw new Error("Partner ID is required");
+    }
+
+    // Fetch Partner by ID with optional filters
+    const partner = await PartnerModel.findOne({ _id: partnerId, isDeleted: false })
+      .populate("locations") // Populate related locations
+      .lean();
+
+    if (!partner) {
+      return Utilities.sendResponsData({
+        code: 404,
+        message: MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+        data: null,
+      });
+    }
+
+    // Fetch additional location data for the partner
+    const locations = await PartnerLocationModel.find({ partnerId: partner._id }).lean();
+
+    // Merge partner details with additional data
+    const partnerDetails = { ...partner, locations };
+
+    // Return success response
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_FETCHED,
+      data: partnerDetails,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+// Service Function to Delete Partner by ID
+export const deletePartnerById = async (partnerId: string, next: any) => {
+  try {
+    // Validate Partner ID
+    if (!partnerId) {
+      throw new Error("Partner ID is required");
+    }
+
+    // Find and Soft Delete Partner
+    const partner = await PartnerModel.findOneAndUpdate(
+      { _id: partnerId, isDeleted: false }, // Ensure partner exists and is not already deleted
+      { isDeleted: true }, // Soft delete by setting `isDeleted` to true
+      { new: true } // Return the updated document
+    ).lean();
+
+    if (!partner) {
+      return Utilities.sendResponsData({
+        code: 404,
+        message: MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+        data: null,
+      });
+    }
+
+    // Return Success Response
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_DELETED,
+      data: partner,
     });
   } catch (error) {
     next(error);

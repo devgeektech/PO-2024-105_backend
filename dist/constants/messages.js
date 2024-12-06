@@ -54,7 +54,9 @@ exports.MESSAGES = {
         PARTNER_CREATED: "Partner and associated locations created successfully",
         PARTNER_NOT_FOUND: "The requested partner was not found",
         PARTNER_UPDATED: "The partner has been successfully updated",
-        PARTNERS_FETCHED: "Partners have been successfully retrieved"
+        PARTNERS_FETCHED: "Partners have been successfully retrieved",
+        PARTNER_FETCHED: "Partner has been successfully retrieved",
+        PARTNER_DELETED: "Partner deleted successfully"
     },
     PARTNER: {
         VERIFICATION_CODE_SEND: "Account verification code send to email",

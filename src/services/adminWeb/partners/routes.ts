@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import config from "config";
 import { checkAuthenticate } from "./middleware/check";
-import { addPartnerWithLocation, getAllPartners } from "./controller";
+import { addPartnerWithLocation, deletePartnerById, editPartnerWithLocation, getAllPartners, getPartnerById } from "./controller";
 const basePath = config.get("BASE_PATH");
 const userPath = 'adminWeb';
 const userPathURL = basePath + userPath;
@@ -15,7 +15,6 @@ export default [
       checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await addPartnerWithLocation(
-          req.get("Authorization"),
           req.body,
           next
         );
@@ -25,33 +24,61 @@ export default [
   },
 
   // edit partner //
-  // {
-  //   path: userPathURL + "/partner/:id",
-  //   method: "put",
-  //   handler: [
-  //     checkAuthenticate,
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //       const result = await editPartnerWithLocation(
-  //         req.get("Authorization"),
-  //         req.params.id,
-  //         req.body,
-  //         next
-  //       );
-  //       res.status(200).send(result);
-  //     },
-  //   ],  
-  // },
+  {
+    path: userPathURL + "/partner/:id",
+    method: "put",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await editPartnerWithLocation(
+          req.params.id,
+          req.body,
+          next
+        );
+        res.status(200).send(result);
+      },
+    ],  
+  },
 
   // get all partners //
-  // {
-  //   path: userPathURL + "/partners",
-  //   method: "get",
-  //   handler: [
-  //     checkAuthenticate,
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //       const result = await getAllPartners(req.get("Authorization"), req.query, next);
-  //       res.status(200).send(result);
-  //     },
-  //   ],
-  // }
+  {
+    path: userPathURL + "/partners",
+    method: "get",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await getAllPartners(req.get("Authorization"), req.query, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //get Partner By Id //
+  {
+    path: userPathURL + "/partner/:id",
+    method: "get",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const partnerId = req.params.id; // Extract partner ID from URL
+        const result = await getPartnerById(partnerId, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  // delete Partner By Id //
+  {
+    path: userPathURL + "/partner/:id",
+    method: "delete",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const partnerId = req.params.id; // Extract partner ID from URL
+        const result = await deletePartnerById(partnerId, next);
+        res.status(200).send(result);
+      },
+    ],
+  }
+
 ];
