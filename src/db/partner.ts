@@ -48,11 +48,6 @@ const partnerSchema = new mongoose.Schema({
   wellnessTypeId: {
     type: mongoose.Schema.Types.ObjectId
   },
-  servivces: [
-    {
-      type: mongoose.Schema.Types.ObjectId
-    }
-  ],
   locations: [
     {
       type: mongoose.Schema.Types.ObjectId
