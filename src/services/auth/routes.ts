@@ -11,6 +11,8 @@ import {
   partnerAddWithLocation,
   partnerCreateNewPassword,
   partnerLogin,
+  partnerForgotPassword,
+  partnerVerifyResetLink,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -26,6 +28,7 @@ const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
 const partnerPathURL = currentPath + partnerPath;
 
+console.log('partnerPathURL ===== ',partnerPathURL);
 
 export default [
   //***********************   ADMIN   *************************//
@@ -159,6 +162,30 @@ export default [
     handler: [
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await partnerLogin(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  partner forgot Password  //
+  {
+    path: partnerPathURL + 'forgotPassword',
+    method: "post",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerForgotPassword(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  partner verify link  //
+  {
+    path: partnerPathURL + 'resetLink/:id',
+    method: "get",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerVerifyResetLink(req.params, req.query, next);
         res.status(200).send(result);
       },
     ],

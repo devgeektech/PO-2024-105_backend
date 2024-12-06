@@ -455,7 +455,15 @@ export const partnerCreateNewPassword = async (bodyData: any, next: any) => {
 
     const pass = await Utilities.cryptPassword(bodyData.password);
     partner.password = pass;
-    partner.onBoarded =true;
+    partner.onBoarded = true;
+
+    let partnerToken = await Utilities.createJWTToken({
+      id: partner._id,
+      email: partner.email,
+      name: partner.name || "",
+    });
+    partner.token = partnerToken;
+
     await partner.save();
     delete partner.password;
 
@@ -472,7 +480,7 @@ export const partnerCreateNewPassword = async (bodyData: any, next: any) => {
 //  partner Login  //
 export const partnerLogin = async (bodyData: any, next: any) => {
   try {
-    const partner: any = await PartnerModel.findOne({email: bodyData.email, isDeleted: false});
+    const partner: any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
     if (!partner) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
@@ -510,6 +518,90 @@ export const partnerLogin = async (bodyData: any, next: any) => {
     next(error);
   }
 };
+
+//  partner Forgot Password  //
+export const partnerForgotPassword = async (body: any, next: any) => {
+  try {
+    let partner: any = await PartnerModel.findOne({ email: body.email, isDeleted: false });
+    if (partner) {
+      let randomOTP = Utilities.genNumericCode(6);
+      console.log('randomOTP >>>> ', randomOTP, process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP);
+
+      // Get email template to send email
+      let messageHtml = await ejs.renderFile(
+        process.cwd() + "/src/views/forgotPassword.ejs",
+        { link: process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP },
+        { async: true }
+      );
+      let mailResponse = MailerUtilities.sendSendgridMail({
+        recipient_email: [body.email],
+        subject: "Password reset link",
+        text: messageHtml,
+      });
+
+      partner['otp'] = randomOTP;
+      partner['otpVerified'] = false;
+      partner['otpExipredAt'] = moment().add(10, "m");
+      await partner.save();
+
+      return Utilities.sendResponsData({
+        code: 200,
+        message: "Mail is sent with link",
+      });
+    } else {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+//  partner Verify Reset Link  //
+export const partnerVerifyResetLink = async (params: any, query: any, next: NextFunction) => {
+  try {
+    let partner = await PartnerModel.findById(params.id);
+    if (!partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.INVALID_LINK,
+        })
+      );
+    }
+    if (partner.otp != query.otp) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.INVALID_LINK,
+        })
+      );
+    }
+    if (moment().isAfter(moment(partner.otpExipredAt))) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.LINK_EXPIRED,
+        })
+      );
+    }
+
+    partner.otp = 0;
+    partner.otpVerified = true;
+    await partner.save();
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.LINK_VERIFIED,
+      data: partner
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
 
 

@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerVerifyResetLink = exports.partnerForgotPassword = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -430,6 +430,12 @@ const partnerCreateNewPassword = (bodyData, next) => __awaiter(void 0, void 0, v
         const pass = yield Utilities_1.Utilities.cryptPassword(bodyData.password);
         partner.password = pass;
         partner.onBoarded = true;
+        let partnerToken = yield Utilities_1.Utilities.createJWTToken({
+            id: partner._id,
+            email: partner.email,
+            name: partner.name || "",
+        });
+        partner.token = partnerToken;
         yield partner.save();
         delete partner.password;
         return Utilities_1.Utilities.sendResponsData({
@@ -479,6 +485,77 @@ const partnerLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.partnerLogin = partnerLogin;
+//  partner Forgot Password  //
+const partnerForgotPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findOne({ email: body.email, isDeleted: false });
+        if (partner) {
+            let randomOTP = Utilities_1.Utilities.genNumericCode(6);
+            console.log('randomOTP >>>> ', randomOTP, process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP);
+            // Get email template to send email
+            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/forgotPassword.ejs", { link: process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP }, { async: true });
+            let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+                recipient_email: [body.email],
+                subject: "Password reset link",
+                text: messageHtml,
+            });
+            partner['otp'] = randomOTP;
+            partner['otpVerified'] = false;
+            partner['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
+            yield partner.save();
+            return Utilities_1.Utilities.sendResponsData({
+                code: 200,
+                message: "Mail is sent with link",
+            });
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerForgotPassword = partnerForgotPassword;
+//  partner Verify Reset Link  //
+const partnerVerifyResetLink = (params, query, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findById(params.id);
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if (partner.otp != query.otp) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if ((0, moment_1.default)().isAfter((0, moment_1.default)(partner.otpExipredAt))) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.LINK_EXPIRED,
+            }));
+        }
+        partner.otp = 0;
+        partner.otpVerified = true;
+        yield partner.save();
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.LINK_VERIFIED,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerVerifyResetLink = partnerVerifyResetLink;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

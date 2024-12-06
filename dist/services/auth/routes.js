@@ -23,6 +23,7 @@ const partnerPath = '/partner/';
 const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
 const partnerPathURL = currentPath + partnerPath;
+console.log('partnerPathURL ===== ', partnerPathURL);
 exports.default = [
     //***********************   ADMIN   *************************//
     //  login  //
@@ -145,6 +146,28 @@ exports.default = [
         handler: [
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
                 const result = yield (0, controller_1.partnerLogin)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner forgot Password  //
+    {
+        path: partnerPathURL + 'forgotPassword',
+        method: "post",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerForgotPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner verify link  //
+    {
+        path: partnerPathURL + 'resetLink/:id',
+        method: "get",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerVerifyResetLink)(req.params, req.query, next);
                 res.status(200).send(result);
             }),
         ],
