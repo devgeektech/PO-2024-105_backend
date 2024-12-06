@@ -1,9 +1,13 @@
 import authRoutes from './auth/routes';
 import userRoutes from './users/routes';
-import adminWebRoutes from './adminWeb/routes';
+import wellnessTypeRotes from './adminWeb/wellnessTypes/routes';
+import servicesRoutes from './adminWeb/services/routes'
+import subServicesRoutes from './adminWeb/subServices/routes'
 
 export default [
     ...authRoutes,
     ...userRoutes,
-    ...adminWebRoutes,
+    ...wellnessTypeRotes,
+    ...servicesRoutes,
+    ...subServicesRoutes
 ];

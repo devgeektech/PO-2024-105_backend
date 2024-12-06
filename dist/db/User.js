@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: constants_1.ROLES,
-        default: 'member'
+        default: ''
     },
     email: {
         type: String,

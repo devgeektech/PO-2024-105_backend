@@ -4,7 +4,7 @@ import {  WELLNESS_BUSINESS_TYPE } from '../constants';
 const wellnessTypeSchema = new mongoose.Schema({
   name: {
     type: String,
-    enum: WELLNESS_BUSINESS_TYPE,
+    // enum: WELLNESS_BUSINESS_TYPE,
     default: ""
   },
   image: {
@@ -13,7 +13,15 @@ const wellnessTypeSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    default: '',
+    default: ''
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'users',
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
   },
 },
   { timestamps: true });
