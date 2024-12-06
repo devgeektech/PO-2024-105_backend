@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WELLNESS_BUSINESS_TYPE = exports.ADVERTING_STATUS = exports.ROOM_TYPES = exports.PLAN_TYPES = exports.EVENT_TYPES = exports.EVENT_STATUS = exports.TASK_STATUS = exports.DEFAULT_ADMIN = exports.GENDERS = exports.ROLES = void 0;
 exports.ROLES = ['admin', 'employee', 'fitnessPartner', 'company'];
-exports.GENDERS = ['other', 'male', 'female', 'männlich', 'weiblich'];
+exports.GENDERS = ['', 'other', 'male', 'female'];
 exports.DEFAULT_ADMIN = {
     firstName: "Admin",
     lastName: "",

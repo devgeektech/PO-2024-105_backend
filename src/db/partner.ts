@@ -7,7 +7,7 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-  bussinessName: {
+  businessName: {
     type: String,
     default: ""
   }, 
@@ -18,24 +18,26 @@ const partnerSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
+    default: ""
   },
   image: {
     type: String,
     default: ""
   },
   phone: {
-    type: String
+    type: String,
+    default: ""
   },
   gender: {
     type: String,
-    enum: GENDERS
+    enum: GENDERS,
+    default: "",
   },
   approved: {
     type: Boolean,
     default: false
   },
-  bussinessWebsite: {
+  businessWebsite: {
     type: String,
     default: '',
   },

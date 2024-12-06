@@ -11,6 +11,7 @@ import { MailerUtilities } from "../../utils/MailerUtilities";
 import { generateVerificationLink } from "../../utils";
 import { MESSAGES } from "../../constants/messages";
 import { NextFunction } from "express";
+import { PartnerModel } from "../../db/partner";
 
 //********************  admin controller  ***********************************//
 export const adminSignUp = async () => {
@@ -244,6 +245,55 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
     next(error);
   }
 };
+
+
+//********************  FITNESS PRTNER controller  ***********************************//
+//  partner Signup //
+export const partnerSignup = async (bodyData: any, next: any) => {
+  try {
+    let partnerExists = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (partnerExists) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+
+    let randomOTP = Utilities.genNumericCode(4);
+    console.log('randomOTP >>>> ', randomOTP,);
+
+    // Get email template to send email
+    let messageHtml = await ejs.renderFile(
+      process.cwd() + "/src/views/partnerRegistration.ejs",
+      { code: randomOTP },
+      { async: true }
+    );
+    let mailResponse = MailerUtilities.sendSendgridMail({
+      recipient_email: [bodyData.email],
+      subject: "Verification code",
+      text: messageHtml,
+    });
+
+    bodyData['otp'] = randomOTP;
+    bodyData['otpVerified'] = false;
+    bodyData['otpExipredAt'] = moment().add(10, "m");
+    let result = await PartnerModel.create(bodyData);
+
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
+      data:result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
+
 
 
 //***********************   MEMBER   *************************//

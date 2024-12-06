@@ -17,7 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = __importDefault(require("config"));
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
-const User_1 = require("../../db/User");
+const user_1 = require("../../db/user");
 const Utilities_1 = require("../../utils/Utilities");
 const MailerUtilities_1 = require("../../utils/MailerUtilities");
 const defaultSlots_1 = require("../../db/defaultSlots");
@@ -38,7 +38,7 @@ const getAllUsers = (auth, req, next) => __awaiter(void 0, void 0, void 0, funct
                 { phone: new RegExp(search, 'i') },
             ];
         }
-        const users = yield User_1.UserModel.aggregate([
+        const users = yield user_1.UserModel.aggregate([
             {
                 $match: Object.assign({}, query)
             },
@@ -67,7 +67,7 @@ const getAllUsers = (auth, req, next) => __awaiter(void 0, void 0, void 0, funct
                 $limit: Number(limit),
             }
         ]);
-        const totalRecord = yield User_1.UserModel.countDocuments(query);
+        const totalRecord = yield user_1.UserModel.countDocuments(query);
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: "Success",
@@ -97,7 +97,7 @@ const getAllMembers = (auth, req, next) => __awaiter(void 0, void 0, void 0, fun
                 { phone: new RegExp(search, 'i') },
             ];
         }
-        const users = yield User_1.UserModel.aggregate([
+        const users = yield user_1.UserModel.aggregate([
             {
                 $match: Object.assign({}, query)
             },
@@ -108,7 +108,7 @@ const getAllMembers = (auth, req, next) => __awaiter(void 0, void 0, void 0, fun
                 $limit: Number(limit),
             }
         ]);
-        const totalRecord = yield User_1.UserModel.countDocuments(query);
+        const totalRecord = yield user_1.UserModel.countDocuments(query);
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: "Success",
@@ -129,7 +129,7 @@ const getAllTrainers = (next) => __awaiter(void 0, void 0, void 0, function* () 
             role: { $in: ['trainer'] },
             isSuperUser: { $ne: true }
         };
-        const users = yield User_1.UserModel.aggregate([
+        const users = yield user_1.UserModel.aggregate([
             {
                 $match: Object.assign({}, query)
             },
@@ -142,7 +142,7 @@ const getAllTrainers = (next) => __awaiter(void 0, void 0, void 0, function* () 
                 }
             }
         ]);
-        const totalRecord = yield User_1.UserModel.countDocuments(query);
+        const totalRecord = yield user_1.UserModel.countDocuments(query);
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: "Success",
@@ -162,7 +162,7 @@ const getAllUsersForExport = (next) => __awaiter(void 0, void 0, void 0, functio
             isDeleted: false,
             approved: true
         };
-        const users = yield User_1.UserModel.aggregate([
+        const users = yield user_1.UserModel.aggregate([
             {
                 $match: Object.assign({}, query)
             },
@@ -191,7 +191,7 @@ const getAllUsersForExport = (next) => __awaiter(void 0, void 0, void 0, functio
 exports.getAllUsersForExport = getAllUsersForExport;
 const getUserProfileById = (userId, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let user = yield User_1.UserModel.findById(userId).select("-password").lean();
+        let user = yield user_1.UserModel.findById(userId).select("-password").lean();
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
                 code: 404,
@@ -211,7 +211,7 @@ const getUserProfileById = (userId, next) => __awaiter(void 0, void 0, void 0, f
 exports.getUserProfileById = getUserProfileById;
 const addUser = (bodyData, files, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let checkExist = yield User_1.UserModel.exists({ email: bodyData.email });
+        let checkExist = yield user_1.UserModel.exists({ email: bodyData.email });
         if (checkExist) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -224,7 +224,7 @@ const addUser = (bodyData, files, next) => __awaiter(void 0, void 0, void 0, fun
         }
         bodyData.password = pass;
         bodyData.role = JSON.parse(bodyData.role);
-        const result = yield User_1.UserModel.create(bodyData);
+        const result = yield user_1.UserModel.create(bodyData);
         let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/welcome.ejs", {
             name: `${(bodyData === null || bodyData === void 0 ? void 0 : bodyData.firstName) || ""} ${(bodyData === null || bodyData === void 0 ? void 0 : bodyData.lastName) || ""}`
         }, { async: true });
@@ -247,7 +247,7 @@ exports.addUser = addUser;
 const updateUser = (userId, bodyData, files, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
-        const user = yield User_1.UserModel.findById(userId);
+        const user = yield user_1.UserModel.findById(userId);
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
                 code: 404,
@@ -255,7 +255,7 @@ const updateUser = (userId, bodyData, files, next) => __awaiter(void 0, void 0, 
             }));
         }
         if (bodyData.email && bodyData.email !== user.email) {
-            const emailExists = yield User_1.UserModel.exists({ email: bodyData.email });
+            const emailExists = yield user_1.UserModel.exists({ email: bodyData.email });
             if (emailExists) {
                 throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                     code: 400,
@@ -315,7 +315,7 @@ const updateUser = (userId, bodyData, files, next) => __awaiter(void 0, void 0, 
         payload = Object.assign(Object.assign({}, payload), { matchPermissionDoc, clubTransferDoc, birthCertificateDoc, residenceCertificateDoc,
             playersParentDeclarationDoc, copyOfPassportDoc, attachmentArgentinaDoc, attachmentIstupnicaDoc,
             attachmentBrisovnicaDoc, avatar });
-        const updatedUser = yield User_1.UserModel.findOneAndUpdate({ _id: userId }, { $set: payload }, { new: true });
+        const updatedUser = yield user_1.UserModel.findOneAndUpdate({ _id: userId }, { $set: payload }, { new: true });
         if (role && ((_a = payload.role) === null || _a === void 0 ? void 0 : _a.length) !== ((_b = user.role) === null || _b === void 0 ? void 0 : _b.length)) {
             let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/roleInvitation.ejs", {
                 name: `${(user === null || user === void 0 ? void 0 : user.firstName) || ""} ${(user === null || user === void 0 ? void 0 : user.lastName) || ""}`,
@@ -340,7 +340,7 @@ exports.updateUser = updateUser;
 const updateSponsor = (userId, bodyData, files, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     try {
-        const user = yield User_1.UserModel.findById(userId);
+        const user = yield user_1.UserModel.findById(userId);
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
                 code: 404,
@@ -348,7 +348,7 @@ const updateSponsor = (userId, bodyData, files, next) => __awaiter(void 0, void 
             }));
         }
         if (bodyData.email && bodyData.email !== user.email) {
-            const emailExists = yield User_1.UserModel.exists({ email: bodyData.email });
+            const emailExists = yield user_1.UserModel.exists({ email: bodyData.email });
             if (emailExists) {
                 throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                     code: 400,
@@ -381,7 +381,7 @@ const updateSponsor = (userId, bodyData, files, next) => __awaiter(void 0, void 
             }
         }
         payload = Object.assign(Object.assign({}, payload), { companyLogo, avatar });
-        const updatedUser = yield User_1.UserModel.findOneAndUpdate({ _id: userId }, { $set: payload }, { new: true });
+        const updatedUser = yield user_1.UserModel.findOneAndUpdate({ _id: userId }, { $set: payload }, { new: true });
         if (role && ((_a = payload.role) === null || _a === void 0 ? void 0 : _a.length) !== ((_b = user.role) === null || _b === void 0 ? void 0 : _b.length)) {
             let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/roleInvitation.ejs", {
                 name: `${(user === null || user === void 0 ? void 0 : user.firstName) || ""} ${(user === null || user === void 0 ? void 0 : user.lastName) || ""}`,
@@ -405,7 +405,7 @@ const updateSponsor = (userId, bodyData, files, next) => __awaiter(void 0, void 
 exports.updateSponsor = updateSponsor;
 const updateUserAvatar = (userId, files, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield User_1.UserModel.findById(userId);
+        const user = yield user_1.UserModel.findById(userId);
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
                 code: 404,
@@ -430,7 +430,7 @@ exports.updateUserAvatar = updateUserAvatar;
 const approveUser = (userId, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const user = yield User_1.UserModel.findById(userId);
+        const user = yield user_1.UserModel.findById(userId);
         const { approved } = bodyData;
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
@@ -438,7 +438,7 @@ const approveUser = (userId, bodyData, next) => __awaiter(void 0, void 0, void 0
                 message: config_1.default.get("ERRORS.COMMON_ERRORS.USER_NOT_FOUND"),
             }));
         }
-        const updatedUser = yield User_1.UserModel.findOneAndUpdate({ _id: (_a = user === null || user === void 0 ? void 0 : user._id) === null || _a === void 0 ? void 0 : _a.toString() }, { $set: { approved } }, { new: true });
+        const updatedUser = yield user_1.UserModel.findOneAndUpdate({ _id: (_a = user === null || user === void 0 ? void 0 : user._id) === null || _a === void 0 ? void 0 : _a.toString() }, { $set: { approved } }, { new: true });
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: config_1.default.get("ERRORS.COMMON_ERRORS.USER_UPDATED"),
@@ -452,7 +452,7 @@ const approveUser = (userId, bodyData, next) => __awaiter(void 0, void 0, void 0
 exports.approveUser = approveUser;
 const deleteUser = (userId, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield User_1.UserModel.findById(userId);
+        const user = yield user_1.UserModel.findById(userId);
         if (!user) {
             throw new httpErrors_1.HTTP404Error(Utilities_1.Utilities.sendResponsData({
                 code: 404,
@@ -647,12 +647,12 @@ const assignedMembers = (userId, bodyData, next) => __awaiter(void 0, void 0, vo
     var _a;
     try {
         const validParticipants = bodyData.filter((user) => mongoose_1.default.Types.ObjectId.isValid(user._id));
-        const updatedUser = yield User_1.UserModel.findByIdAndUpdate(userId, {
+        const updatedUser = yield user_1.UserModel.findByIdAndUpdate(userId, {
             $set: { assignendUser: validParticipants },
         }, { new: true });
         if (!updatedUser)
             throw new Error("User not found.");
-        let users = yield User_1.UserModel.aggregate([
+        let users = yield user_1.UserModel.aggregate([
             {
                 $match: { _id: new mongoose_1.default.Types.ObjectId(userId) },
             },
@@ -684,7 +684,7 @@ exports.assignedMembers = assignedMembers;
 const assignedMembersRecords = (userId, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        let users = yield User_1.UserModel.aggregate([
+        let users = yield user_1.UserModel.aggregate([
             {
                 $match: { _id: new mongoose_1.default.Types.ObjectId(userId) },
             },

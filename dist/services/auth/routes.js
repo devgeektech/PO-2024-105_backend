@@ -19,8 +19,10 @@ const basePath = config_1.default.get("BASE_PATH");
 const currentPath = basePath + "auth";
 const adminPath = '/admin/';
 const memberPath = '/member/';
+const partnerPath = '/partner/';
 const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
+const partnerPathURL = currentPath + partnerPath;
 exports.default = [
     //***********************   ADMIN   *************************//
     //  login  //
@@ -79,6 +81,30 @@ exports.default = [
             }),
         ],
     },
+    //***********************   FITNESS PRTNER   *************************// 
+    //  signup  //
+    {
+        path: partnerPathURL + "signup",
+        method: "post",
+        handler: [
+            check_1.checkPartnerSignup,
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerSignup)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  login  //
+    // {
+    //   path: partnerPathURL + "login",
+    //   method: "post",
+    //   handler: [
+    //     async (req: Request, res: Response, next: NextFunction) => {
+    //       const result = await partnerLogin(req.body, next);
+    //       res.status(200).send(result);
+    //     },
+    //   ],
+    // },
     //***********************   MEMBER   *************************//
     //  register  //
     {

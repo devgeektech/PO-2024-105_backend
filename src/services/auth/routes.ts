@@ -5,18 +5,22 @@ import {
   createNewPassword,
   forgotPassword,
   verifyResetLink,
+  partnerSignup,
+
   memberLogin,
   memberLoginByToken,
   memberRegister,
 } from "./controller";
 import config from "config";
-import { checkLogin, checkAuthenticate, } from "./middleware/check";
+import { checkLogin, checkAuthenticate, checkPartnerSignup, } from "./middleware/check";
 const basePath = config.get("BASE_PATH");
 const currentPath = basePath + "auth";
 const adminPath = '/admin/';
 const memberPath = '/member/';
+const partnerPath = '/partner/';
 const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
+const partnerPathURL = currentPath + partnerPath;
 
 
 export default [
@@ -81,6 +85,32 @@ export default [
       },
     ],
   },
+
+  //***********************   FITNESS PRTNER   *************************// 
+   //  signup  //
+  {
+    path: partnerPathURL + "signup",
+    method: "post",
+    handler: [
+      checkPartnerSignup,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerSignup(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  login  //
+  // {
+  //   path: partnerPathURL + "login",
+  //   method: "post",
+  //   handler: [
+  //     async (req: Request, res: Response, next: NextFunction) => {
+  //       const result = await partnerLogin(req.body, next);
+  //       res.status(200).send(result);
+  //     },
+  //   ],
+  // },
 
 
   //***********************   MEMBER   *************************//

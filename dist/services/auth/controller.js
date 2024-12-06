@@ -35,11 +35,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
-const User_1 = require("../../db/User");
+const user_1 = require("../../db/user");
 const Utilities_1 = require("../../utils/Utilities");
 var mongoose = require("mongoose");
 const bcrypt = __importStar(require("bcrypt"));
@@ -48,15 +48,16 @@ const constants_1 = require("../../constants");
 const MailerUtilities_1 = require("../../utils/MailerUtilities");
 const utils_1 = require("../../utils");
 const messages_1 = require("../../constants/messages");
+const partner_1 = require("../../db/partner");
 //********************  admin controller  ***********************************//
 const adminSignUp = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let adminData = constants_1.DEFAULT_ADMIN;
-        let checkExist = yield User_1.UserModel.exists({ email: adminData.email });
+        let checkExist = yield user_1.UserModel.exists({ email: adminData.email });
         if (!checkExist) {
             const pass = yield Utilities_1.Utilities.cryptPassword(adminData.password);
             adminData.password = pass;
-            yield User_1.UserModel.create(adminData);
+            yield user_1.UserModel.create(adminData);
             console.log('admin created successfully');
         }
     }
@@ -68,7 +69,7 @@ exports.adminSignUp = adminSignUp;
 const adminLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = bodyData;
-        const admin = yield User_1.UserModel.findOne({
+        const admin = yield user_1.UserModel.findOne({
             role: { $in: ["admin"] },
             isDeleted: false,
             email,
@@ -112,7 +113,7 @@ exports.adminLogin = adminLogin;
 //  Forgot password  //
 const forgotPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let userRes = yield User_1.UserModel.findOne({
+        let userRes = yield user_1.UserModel.findOne({
             email: body.email,
             isDeleted: false,
         });
@@ -150,7 +151,7 @@ exports.forgotPassword = forgotPassword;
 //  verify Reset sLink  //
 const verifyResetLink = (params, query, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let user = yield User_1.UserModel.findById(params.id);
+        let user = yield user_1.UserModel.findById(params.id);
         if (!user) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -186,7 +187,7 @@ exports.verifyResetLink = verifyResetLink;
 // create new password
 const createNewPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        let userRes = yield User_1.UserModel.findOne({
+        let userRes = yield user_1.UserModel.findOne({
             email: body.email,
             isDeleted: false,
         });
@@ -223,7 +224,7 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
     try {
         const { oldPassword, newPassword } = bodyData;
         const decoded = yield Utilities_1.Utilities.getDecoded(token);
-        let adminRes = yield User_1.UserModel.findOne({
+        let adminRes = yield user_1.UserModel.findOne({
             _id: new mongoose.Types.ObjectId(decoded.id),
             isDeleted: false,
         });
@@ -257,12 +258,47 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
     }
 });
 exports.adminChangePassword = adminChangePassword;
+//********************  FITNESS PRTNER controller  ***********************************//
+//  partner Signup //
+const partnerSignup = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partnerExists = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (partnerExists) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+        let randomOTP = Utilities_1.Utilities.genNumericCode(4);
+        console.log('randomOTP >>>> ', randomOTP);
+        // Get email template to send email
+        let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/partnerRegistration.ejs", { code: randomOTP }, { async: true });
+        let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+            recipient_email: [bodyData.email],
+            subject: "Verification code",
+            text: messageHtml,
+        });
+        bodyData['otp'] = randomOTP;
+        bodyData['otpVerified'] = false;
+        bodyData['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
+        let result = yield partner_1.PartnerModel.create(bodyData);
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
+            data: result
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerSignup = partnerSignup;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = bodyData;
-        const user = yield User_1.UserModel.findOne({ email, isDeleted: false, role: { $in: ["member", "trainer", "sponsor"] } });
+        const user = yield user_1.UserModel.findOne({ email, isDeleted: false, role: { $in: ["member", "trainer", "sponsor"] } });
         if (!user) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -308,7 +344,7 @@ const memberLoginByToken = (bodyData, next) => __awaiter(void 0, void 0, void 0,
     try {
         const { token } = bodyData;
         const decoded = yield Utilities_1.Utilities.getDecoded(token);
-        const user = yield User_1.UserModel.findOne({ _id: decoded === null || decoded === void 0 ? void 0 : decoded.id, isDeleted: false, role: { $in: ["member"] } });
+        const user = yield user_1.UserModel.findOne({ _id: decoded === null || decoded === void 0 ? void 0 : decoded.id, isDeleted: false, role: { $in: ["member"] } });
         if (!user) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -347,7 +383,7 @@ const memberRegister = (files, bodyData, next) => __awaiter(void 0, void 0, void
     try {
         const { email } = bodyData;
         const query = [{ isDeleted: false }, { email }];
-        const user = yield User_1.UserModel.findOne({ $and: query });
+        const user = yield user_1.UserModel.findOne({ $and: query });
         if (user) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -392,7 +428,7 @@ const memberRegister = (files, bodyData, next) => __awaiter(void 0, void 0, void
         bodyData = Object.assign(Object.assign({}, bodyData), { matchPermissionDoc, clubTransferDoc, birthCertificateDoc, residenceCertificateDoc,
             playersParentDeclarationDoc, copyOfPassportDoc, attachmentArgentinaDoc, attachmentIstupnicaDoc,
             attachmentBrisovnicaDoc, siblingDetails: JSON.parse(bodyData.siblingDetails), joinedAt: (0, moment_1.default)().add(1, 'months').set("date", 1).toISOString(), email: String(email).toLowerCase() });
-        const registerUser = yield new User_1.UserModel(bodyData).save();
+        const registerUser = yield new user_1.UserModel(bodyData).save();
         const link = yield (0, utils_1.generateVerificationLink)(registerUser);
         let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/registrationVerification.ejs", { name: `${bodyData === null || bodyData === void 0 ? void 0 : bodyData.firstName}`, verifyLink: link }, { async: true });
         let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
@@ -420,7 +456,7 @@ const deleteUserbyAdmin = (token, userId, next) => __awaiter(void 0, void 0, voi
                 message: config_1.default.get("ERRORS.COMMON_ERRORS.INVALID_ID_FORMAT"),
             });
         }
-        const userData = yield User_1.UserModel.findOne({ _id: mongoose.Types.ObjectId(userId), isDeleted: false });
+        const userData = yield user_1.UserModel.findOne({ _id: mongoose.Types.ObjectId(userId), isDeleted: false });
         if (!userData) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -458,7 +494,7 @@ const verifyAccount = (body, next) => __awaiter(void 0, void 0, void 0, function
                 message: config_1.default.get("ERRORS.COMMON_ERRORS.LINK_EXPIRED"),
             }));
         }
-        const userData = yield User_1.UserModel.findOne({ _id: mongoose.Types.ObjectId(userId), isDeleted: false });
+        const userData = yield user_1.UserModel.findOne({ _id: mongoose.Types.ObjectId(userId), isDeleted: false });
         if (!userData) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
@@ -480,7 +516,7 @@ exports.verifyAccount = verifyAccount;
 // check email exists
 const checkEmailExistence = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const isExist = yield User_1.UserModel.exists({ email: body === null || body === void 0 ? void 0 : body.email });
+        const isExist = yield user_1.UserModel.exists({ email: body === null || body === void 0 ? void 0 : body.email });
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             data: isExist
@@ -493,7 +529,7 @@ const checkEmailExistence = (body, next) => __awaiter(void 0, void 0, void 0, fu
 exports.checkEmailExistence = checkEmailExistence;
 const getMemberByEmail = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const user = yield User_1.UserModel.findOne({ email: body === null || body === void 0 ? void 0 : body.email }).select("firstName lastName dob email").lean();
+        const user = yield user_1.UserModel.findOne({ email: body === null || body === void 0 ? void 0 : body.email }).select("firstName lastName dob email").lean();
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             data: user

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validateMemberRegister = exports.checkAuthenticate = exports.checkLogin = void 0;
+exports.checkPartnerSignup = exports.validateMemberRegister = exports.checkAuthenticate = exports.checkLogin = void 0;
 const httpErrors_1 = require("../../../utils/httpErrors");
 const joi_1 = __importDefault(require("joi"));
 const config_1 = __importDefault(require("config"));
@@ -71,4 +71,33 @@ const validateMemberRegister = (req, res, next) => {
     }
 };
 exports.validateMemberRegister = validateMemberRegister;
+//************  partner validation  *********//
+const checkPartnerSignup = (req, res, next) => {
+    const schema = joi_1.default.object({
+        name: joi_1.default.string().trim().required().messages({
+            "string.empty": "Name cannot be empty",
+        }),
+        email: joi_1.default.string().email().required().messages({
+            "string.empty": "Email cannot be empty",
+        }),
+        businessName: joi_1.default.string().allow(''),
+        businessWebsite: joi_1.default.string().allow(''),
+        phone: joi_1.default.string().allow(''),
+    });
+    const { error, value } = schema.validate(req.body, {
+        abortEarly: false,
+    });
+    if (error) {
+        let messageArr = (0, ErrorHandler_1.errorMessageHander)(error.details);
+        throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+            code: 400,
+            message: messageArr[0],
+        }));
+    }
+    else {
+        req.body = value;
+        next();
+    }
+};
+exports.checkPartnerSignup = checkPartnerSignup;
 //# sourceMappingURL=check.js.map

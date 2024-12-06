@@ -48,5 +48,9 @@ export const MESSAGES = {
       SUBSERVICE_FETCHED: "Sub-service fetched successfully",
       SUBSERVICE_ALREADY_DELETED: "Sub-service is already deleted",
       SUBSERVICE_DELETED: "Sub-service deleted successfully"
+    },
+
+    PARTNER: {
+      VERIFICATION_CODE_SEND: "Account verification code send to email",
     }
   }
