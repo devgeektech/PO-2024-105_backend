@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import config from "config";
 import * as bcrypt from "bcrypt";
 import * as nodemailer from "nodemailer";
-import { UserModel } from "../db/User";
+import { UserModel } from "../db/user";
 import { HTTP400Error, HTTP404Error, HTTP403Error } from "./httpErrors";
 import { invalidTokenError } from "./ErrorHandler";
 import mongoose from "mongoose";

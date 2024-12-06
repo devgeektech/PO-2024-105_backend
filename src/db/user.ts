@@ -3,6 +3,7 @@ import { GENDERS, ROLES } from '../constants';
 import moment from 'moment';
 
 const userSchema = new mongoose.Schema({
+  // user
   firstName: {
     type: String,
     default: ""
@@ -69,7 +70,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-
   createdBy: {
     type: mongoose.Schema.Types.ObjectId
   },

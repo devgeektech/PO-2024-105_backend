@@ -2,7 +2,7 @@
 
 export const ROLES : string[] = ['admin', 'employee', 'fitnessPartner', 'company'];
 
-export const GENDERS = ['other', 'male', 'female', 'männlich', 'weiblich'];
+export const GENDERS = ['','other', 'male', 'female'];
 
 export const DEFAULT_ADMIN = {
     firstName: "Admin",

@@ -1,6 +1,6 @@
 import config from "config";
 import * as nodemailer from "nodemailer";
-import { UserModel } from "../db/User";
+import { UserModel } from "../db/user";
 import { HTTP400Error, HTTP404Error, HTTP403Error } from "./httpErrors";
 import { Utilities } from "./Utilities";
 var sgTransport = require('nodemailer-sendgrid-transport');

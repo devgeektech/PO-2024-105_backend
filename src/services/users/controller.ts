@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import config from "config";
 import ejs from "ejs";
 import { HTTP400Error, HTTP404Error } from "../../utils/httpErrors";
-import { UserModel } from "../../db/User";
+import { UserModel } from "../../db/user";
 import { Utilities } from "../../utils/Utilities";
 import { MailerUtilities } from '../../utils/MailerUtilities';
 import { defaultSlotsModel } from '../../db/defaultSlots';

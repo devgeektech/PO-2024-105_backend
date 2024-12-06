@@ -1,7 +1,7 @@
 import ejs from "ejs";
 import { HTTP400Error } from "../../utils/httpErrors";
 import config from "config";
-import { UserModel } from "../../db/User";
+import { UserModel } from "../../db/user";
 import { Utilities } from "../../utils/Utilities";
 var mongoose = require("mongoose");
 import * as bcrypt from "bcrypt";
