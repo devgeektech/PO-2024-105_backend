@@ -94,6 +94,39 @@ exports.default = [
             }),
         ],
     },
+    //  verify code  //
+    {
+        path: partnerPathURL + "verifyCode",
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerVerifyCode)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    // resend verify code  //
+    {
+        path: partnerPathURL + "resendVerifyCode",
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerResendVerifyCode)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    // resend verify code  //
+    {
+        path: partnerPathURL + "resendVerifyCode",
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerResendVerifyCode)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
     //  login  //
     // {
     //   path: partnerPathURL + "login",

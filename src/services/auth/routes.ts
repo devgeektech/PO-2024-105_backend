@@ -6,6 +6,8 @@ import {
   forgotPassword,
   verifyResetLink,
   partnerSignup,
+  partnerVerifyCode,
+  partnerResendVerifyCode,
 
   memberLogin,
   memberLoginByToken,
@@ -87,7 +89,7 @@ export default [
   },
 
   //***********************   FITNESS PRTNER   *************************// 
-   //  signup  //
+  //  signup  //
   {
     path: partnerPathURL + "signup",
     method: "post",
@@ -99,6 +101,44 @@ export default [
       },
     ],
   },
+
+  //  verify code  //
+  {
+    path: partnerPathURL + "verifyCode",
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerVerifyCode(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  // resend verify code  //
+  {
+    path: partnerPathURL + "resendVerifyCode",
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerResendVerifyCode(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+
+  // resend verify code  //
+  {
+    path: partnerPathURL + "resendVerifyCode",
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerResendVerifyCode(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
 
   //  login  //
   // {
