@@ -43,6 +43,10 @@ const partnerLocationSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  googleBussinessPageLink: {
+    type: String,
+    default: ''
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId
   },
