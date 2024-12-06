@@ -1,9 +1,8 @@
 import * as mongoose from 'mongoose';
-import { GENDERS} from '../constants';
 
 const partnerLocationSchema = new mongoose.Schema({
   // partner
-  partnerId:{
+  partnerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'partners'
   },
@@ -64,4 +63,4 @@ const partnerLocationSchema = new mongoose.Schema({
   }
 })
 
-export const PartnerModel = mongoose.model('partners', partnerLocationSchema);
+export const PartnerLocationModel = mongoose.model('partnerloaction', partnerLocationSchema);

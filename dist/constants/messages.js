@@ -49,7 +49,12 @@ exports.MESSAGES = {
         SUBSERVICE_NOT_FOUND: "Sub-service not found",
         SUBSERVICE_FETCHED: "Sub-service fetched successfully",
         SUBSERVICE_ALREADY_DELETED: "Sub-service is already deleted",
-        SUBSERVICE_DELETED: "Sub-service deleted successfully"
+        SUBSERVICE_DELETED: "Sub-service deleted successfully",
+        EMAIL_EXISTS: "A partner with this email address already exists. Please use a different email",
+        PARTNER_CREATED: "Partner and associated locations created successfully",
+        PARTNER_NOT_FOUND: "The requested partner was not found",
+        PARTNER_UPDATED: "The partner has been successfully updated",
+        PARTNERS_FETCHED: "Partners have been successfully retrieved"
     },
     PARTNER: {
         VERIFICATION_CODE_SEND: "Account verification code send to email",
