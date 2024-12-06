@@ -3,6 +3,10 @@ import { GENDERS} from '../constants';
 
 const partnerLocationSchema = new mongoose.Schema({
   // partner
+  partnerId:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'partners'
+  },
   address: {
     type: String,
     default: ""
