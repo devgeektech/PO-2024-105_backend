@@ -41,6 +41,10 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  checkinRate: {
+    type: String,
+    default: '',
+  },
   isGoogleVerified: {
     type: Boolean,
     default: false
@@ -53,6 +57,10 @@ const partnerSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId
     }
   ],
+  token:{
+    type: String,
+    default: '',
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId
   },
@@ -71,7 +79,11 @@ const partnerSchema = new mongoose.Schema({
   otpExipredAt: {
     type: Date,
     default: null
-  }
+  },
+  onBoarded:{
+    type: Boolean,
+    default: false
+  },
 },
   { timestamps: true });
 

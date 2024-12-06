@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerVerifyResetLink = exports.partnerForgotPassword = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -49,6 +49,7 @@ const MailerUtilities_1 = require("../../utils/MailerUtilities");
 const utils_1 = require("../../utils");
 const messages_1 = require("../../constants/messages");
 const partner_1 = require("../../db/partner");
+const partnerLocations_1 = require("../../db/partnerLocations");
 //********************  admin controller  ***********************************//
 const adminSignUp = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -363,6 +364,198 @@ const partnerResendVerifyCode = (bodyData, next) => __awaiter(void 0, void 0, vo
     }
 });
 exports.partnerResendVerifyCode = partnerResendVerifyCode;
+//  partner Add With Location  //
+const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Validate if email is already in use
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+            }));
+        }
+        // Create partner location(s)
+        const locationPromises = bodyData.locations.map((location) => {
+            return partnerLocations_1.PartnerLocationModel.create({
+                partnerId: partner === null || partner === void 0 ? void 0 : partner._id,
+                address: location.address,
+                city: location.city,
+                state: location.state,
+                phone: location.phone,
+                images: location.images,
+                sevices: bodyData.sevices,
+                date: new Date(location.date),
+                startTime: location.startTime, // 09:00
+                endTime: location.endTime, // 03:00
+                googleBussinessPageLink: location.googleBussinessPageLink,
+            });
+        });
+        const locations = yield Promise.all(locationPromises);
+        for (let item of locations) {
+            partner.locations.push(item._id);
+        }
+        partner.wellnessTypeId = bodyData.wellnessTypeId;
+        partner.isGoogleVerified = bodyData.isGoogleVerified;
+        partner.checkinRate = bodyData.checkinRate;
+        yield partner.save();
+        // Get welcome email template to send email
+        let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/welcome.ejs", { name: partner.name }, { async: true });
+        let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+            recipient_email: [bodyData.email],
+            subject: "Registration Success",
+            text: messageHtml,
+        });
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.ADMIN.PARTNER_CREATED,
+            data: { partner, locations },
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerAddWithLocation = partnerAddWithLocation;
+//   create new password On-board  //
+const partnerCreateNewPassword = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+            }));
+        }
+        const pass = yield Utilities_1.Utilities.cryptPassword(bodyData.password);
+        partner.password = pass;
+        partner.onBoarded = true;
+        let partnerToken = yield Utilities_1.Utilities.createJWTToken({
+            id: partner._id,
+            email: partner.email,
+            name: partner.name || "",
+        });
+        partner.token = partnerToken;
+        yield partner.save();
+        delete partner.password;
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.ADMIN.PARTNER_CREATED,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerCreateNewPassword = partnerCreateNewPassword;
+//  partner Login  //
+const partnerLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+        const passwordMatch = yield Utilities_1.Utilities.VerifyPassword(bodyData.password, partner.password);
+        if (!passwordMatch) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_CREDENTIAL,
+            }));
+        }
+        let partnerToken = yield Utilities_1.Utilities.createJWTToken({
+            id: partner._id,
+            email: partner.email,
+            name: partner.name || "",
+        });
+        partner.token = partnerToken;
+        yield partner.save();
+        delete partner.password;
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.LOGIN_SUCCESS,
+            data: partner,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerLogin = partnerLogin;
+//  partner Forgot Password  //
+const partnerForgotPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findOne({ email: body.email, isDeleted: false });
+        if (partner) {
+            let randomOTP = Utilities_1.Utilities.genNumericCode(6);
+            console.log('randomOTP >>>> ', randomOTP, process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP);
+            // Get email template to send email
+            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/forgotPassword.ejs", { link: process.env.psswordResetBaseUrl + 'auth/partner/resetLink/' + partner._id + '?otp=' + randomOTP }, { async: true });
+            let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+                recipient_email: [body.email],
+                subject: "Password reset link",
+                text: messageHtml,
+            });
+            partner['otp'] = randomOTP;
+            partner['otpVerified'] = false;
+            partner['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
+            yield partner.save();
+            return Utilities_1.Utilities.sendResponsData({
+                code: 200,
+                message: "Mail is sent with link",
+            });
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerForgotPassword = partnerForgotPassword;
+//  partner Verify Reset Link  //
+const partnerVerifyResetLink = (params, query, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findById(params.id);
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if (partner.otp != query.otp) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_LINK,
+            }));
+        }
+        if ((0, moment_1.default)().isAfter((0, moment_1.default)(partner.otpExipredAt))) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.LINK_EXPIRED,
+            }));
+        }
+        partner.otp = 0;
+        partner.otpVerified = true;
+        yield partner.save();
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.LINK_VERIFIED,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerVerifyResetLink = partnerVerifyResetLink;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

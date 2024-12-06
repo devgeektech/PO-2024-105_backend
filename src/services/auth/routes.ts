@@ -8,7 +8,11 @@ import {
   partnerSignup,
   partnerVerifyCode,
   partnerResendVerifyCode,
-
+  partnerAddWithLocation,
+  partnerCreateNewPassword,
+  partnerLogin,
+  partnerForgotPassword,
+  partnerVerifyResetLink,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -24,6 +28,7 @@ const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
 const partnerPathURL = currentPath + partnerPath;
 
+console.log('partnerPathURL ===== ',partnerPathURL);
 
 export default [
   //***********************   ADMIN   *************************//
@@ -126,31 +131,65 @@ export default [
     ],
   },
 
-
-  // resend verify code  //
+  // add partner //  
   {
-    path: partnerPathURL + "resendVerifyCode",
-    method: "put",
+    path: partnerPathURL + "add",
+    method: "post",
     handler: [
       async (req: Request, res: Response, next: NextFunction) => {
-        const result = await partnerResendVerifyCode(req.body, next);
+        const result = await partnerAddWithLocation( req.body, next);
         res.status(200).send(result);
       },
     ],
   },
 
+  // create new password On-board //  
+  {
+    path: partnerPathURL + "createNewPassword",
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerCreateNewPassword( req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
 
-  //  login  //
-  // {
-  //   path: partnerPathURL + "login",
-  //   method: "post",
-  //   handler: [
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //       const result = await partnerLogin(req.body, next);
-  //       res.status(200).send(result);
-  //     },
-  //   ],
-  // },
+  //  partner login  //
+  {
+    path: partnerPathURL + "login",
+    method: "post",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerLogin(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  partner forgot Password  //
+  {
+    path: partnerPathURL + 'forgotPassword',
+    method: "post",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerForgotPassword(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  //  partner verify link  //
+  {
+    path: partnerPathURL + 'resetLink/:id',
+    method: "get",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerVerifyResetLink(req.params, req.query, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
 
 
   //***********************   MEMBER   *************************//

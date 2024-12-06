@@ -23,6 +23,7 @@ const partnerPath = '/partner/';
 const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
 const partnerPathURL = currentPath + partnerPath;
+console.log('partnerPathURL ===== ', partnerPathURL);
 exports.default = [
     //***********************   ADMIN   *************************//
     //  login  //
@@ -116,28 +117,61 @@ exports.default = [
             }),
         ],
     },
-    // resend verify code  //
+    // add partner //  
     {
-        path: partnerPathURL + "resendVerifyCode",
-        method: "put",
+        path: partnerPathURL + "add",
+        method: "post",
         handler: [
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-                const result = yield (0, controller_1.partnerResendVerifyCode)(req.body, next);
+                const result = yield (0, controller_1.partnerAddWithLocation)(req.body, next);
                 res.status(200).send(result);
             }),
         ],
     },
-    //  login  //
-    // {
-    //   path: partnerPathURL + "login",
-    //   method: "post",
-    //   handler: [
-    //     async (req: Request, res: Response, next: NextFunction) => {
-    //       const result = await partnerLogin(req.body, next);
-    //       res.status(200).send(result);
-    //     },
-    //   ],
-    // },
+    // create new password On-board //  
+    {
+        path: partnerPathURL + "createNewPassword",
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerCreateNewPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner login  //
+    {
+        path: partnerPathURL + "login",
+        method: "post",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerLogin)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner forgot Password  //
+    {
+        path: partnerPathURL + 'forgotPassword',
+        method: "post",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerForgotPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner verify link  //
+    {
+        path: partnerPathURL + 'resetLink/:id',
+        method: "get",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerVerifyResetLink)(req.params, req.query, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
     //***********************   MEMBER   *************************//
     //  register  //
     {
