@@ -149,13 +149,13 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
     let skip = parseInt(query.skip) || 0;
     let limit = parseInt(query.limit) || 10;
 
+    let sortField:any = 'createdAt';
+    let sortOrder:any = query.sortOrder === 'desc' ? -1 : 1;
     // Fetch partners with optional filtering
     const filters: any = { isDeleted: false };
-    if (query.name) filters.name = { $regex: query.name, $options: "i" };
-    if (query.email) filters.email = query.email;
 
-    const partners = await PartnerModel.find(filters).skip(skip).limit(limit).populate('locations').lean();
-
+    const partners = await PartnerModel.find(filters).sort({ [sortField]: sortOrder }).skip(skip).limit(limit).populate('locations').lean();
+    let totalCounts = await PartnerModel.countDocuments({isDeleted: false});
     // Fetch locations for each partner
     const partnerDetails = await Promise.all(
       partners.map(async (partner: any) => {
@@ -168,6 +168,7 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.ADMIN.PARTNERS_FETCHED,
+      totalRecord: totalCounts,
       data: partnerDetails,
     });
   } catch (error) {
