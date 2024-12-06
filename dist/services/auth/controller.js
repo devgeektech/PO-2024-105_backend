@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -266,7 +266,7 @@ const partnerSignup = (bodyData, next) => __awaiter(void 0, void 0, void 0, func
         if (partnerExists) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
-                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+                message: messages_1.MESSAGES.USER_EXISTS,
             }));
         }
         let randomOTP = Utilities_1.Utilities.genNumericCode(4);
@@ -293,6 +293,76 @@ const partnerSignup = (bodyData, next) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.partnerSignup = partnerSignup;
+//  partner Verify Code  //
+const partnerVerifyCode = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+        if (partner.otp != bodyData.otp) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.PARTNER.INVALID_CODE,
+            }));
+        }
+        if ((0, moment_1.default)().isAfter((0, moment_1.default)(partner.otpExipredAt))) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.PARTNER.CODE_EXPIRED,
+            }));
+        }
+        partner.otp = 0;
+        partner.otpVerified = true;
+        yield partner.save();
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.PARTNER.CODE_VERIFIED,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerVerifyCode = partnerVerifyCode;
+//  partner Resend Verify Code  //
+const partnerResendVerifyCode = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+        let randomOTP = Utilities_1.Utilities.genNumericCode(4);
+        console.log('randomOTP >>>> ', randomOTP);
+        // Get email template to send email
+        let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/partnerRegistration.ejs", { code: randomOTP }, { async: true });
+        let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+            recipient_email: [bodyData.email],
+            subject: "Verification code",
+            text: messageHtml,
+        });
+        partner['otp'] = randomOTP;
+        partner['otpVerified'] = false;
+        partner['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
+        yield partner.save();
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerResendVerifyCode = partnerResendVerifyCode;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

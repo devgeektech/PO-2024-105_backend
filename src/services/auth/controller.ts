@@ -256,7 +256,7 @@ export const partnerSignup = async (bodyData: any, next: any) => {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
-          message: MESSAGES.USER_NOT_EXISTS,
+          message: MESSAGES.USER_EXISTS,
         })
       );
     }
@@ -284,15 +284,98 @@ export const partnerSignup = async (bodyData: any, next: any) => {
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
-      data:result
+      data: result
     });
   } catch (error) {
     next(error);
   }
 };
 
+//  partner Verify Code  //
+export const partnerVerifyCode = async (bodyData: any, next: any) => {
+  try {
+    let partner = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (!partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+    if (partner.otp != bodyData.otp) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.PARTNER.INVALID_CODE,
+        })
+      );
+    }
+    if (moment().isAfter(moment(partner.otpExipredAt))) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.PARTNER.CODE_EXPIRED,
+        })
+      );
+    }
 
+    partner.otp = 0;
+    partner.otpVerified = true;
+    await partner.save();
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.PARTNER.CODE_VERIFIED,
+      data: partner
+    });
+  } catch (error) {
+    next(error);
+  }
+}
 
+//  partner Resend Verify Code  //
+export const partnerResendVerifyCode = async (bodyData: any, next: any) => {
+  try {
+    let partner:any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (!partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+
+    let randomOTP = Utilities.genNumericCode(4);
+    console.log('randomOTP >>>> ', randomOTP,);
+
+    // Get email template to send email
+    let messageHtml = await ejs.renderFile(
+      process.cwd() + "/src/views/partnerRegistration.ejs",
+      { code: randomOTP },
+      { async: true }
+    );
+    let mailResponse = MailerUtilities.sendSendgridMail({
+      recipient_email: [bodyData.email],
+      subject: "Verification code",
+      text: messageHtml,
+    });
+
+    partner['otp'] = randomOTP;
+    partner['otpVerified'] = false;
+    partner['otpExipredAt'] = moment().add(10, "m");
+    await partner.save();
+
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
+      data: partner
+    });
+
+  } catch (error) {
+    next(error);
+  }
+}
 
 
 

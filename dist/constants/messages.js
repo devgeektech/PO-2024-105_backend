@@ -58,6 +58,9 @@ exports.MESSAGES = {
     },
     PARTNER: {
         VERIFICATION_CODE_SEND: "Account verification code send to email",
+        INVALID_CODE: "Invalid verification code",
+        CODE_EXPIRED: "Verification code expired",
+        CODE_VERIFIED: "OTP verified successfully",
     }
 };
 //# sourceMappingURL=messages.js.map
