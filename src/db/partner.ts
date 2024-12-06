@@ -75,7 +75,11 @@ const partnerSchema = new mongoose.Schema({
   otpExipredAt: {
     type: Date,
     default: null
-  }
+  },
+  onBoarded:{
+    type: Boolean,
+    default: false
+  },
 },
   { timestamps: true });
 

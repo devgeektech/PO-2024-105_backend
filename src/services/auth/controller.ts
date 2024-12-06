@@ -379,15 +379,15 @@ export const partnerResendVerifyCode = async (bodyData: any, next: any) => {
 }
 
 //  partner Add With Location  //
-export const partnerAddWithLocation = async (token: any, bodyData: any, next: any) => {
+export const partnerAddWithLocation = async (bodyData: any, next: any) => {
   try {
     // Validate if email is already in use
-    const partner:any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
-    if (partner) {
+    const partner: any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (!partner) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
-          message: MESSAGES.ADMIN.EMAIL_EXISTS,
+          message: MESSAGES.ADMIN.PARTNER_NOT_FOUND,
         })
       );
     }
@@ -400,16 +400,35 @@ export const partnerAddWithLocation = async (token: any, bodyData: any, next: an
         city: location.city,
         state: location.state,
         phone: location.phone,
-        images: location.images
+        images: location.images,
+        sevices: bodyData.sevices,
+        date: new Date(location.date),
+        startTime: location.startTime, // 09:00
+        endTime: location.endTime, // 03:00
+        googleBussinessPageLink: location.googleBussinessPageLink,
       });
     });
     const locations = await Promise.all(locationPromises);
-
-    const updateData = {
-      wellnessTypeId: bodyData.wellnessTypeId,
-      isGoogleVerified: bodyData.isGoogleVerified,
-      checkinRate: bodyData.checkinRate
+    for(let item of locations){
+      partner.locations.push(item._id)
     }
+
+    partner.wellnessTypeId = bodyData.wellnessTypeId;
+    partner.isGoogleVerified = bodyData.isGoogleVerified;
+    partner.checkinRate = bodyData.checkinRate;
+    await partner.save();
+
+      // Get welcome email template to send email
+      let messageHtml = await ejs.renderFile(
+        process.cwd() + "/src/views/welcome.ejs",
+        { name: partner.name },
+        { async: true }
+      );
+      let mailResponse = MailerUtilities.sendSendgridMail({
+        recipient_email: [bodyData.email],
+        subject: "Registration Success",
+        text: messageHtml,
+      });
 
     // Return success response
     return Utilities.sendResponsData({

@@ -365,14 +365,14 @@ const partnerResendVerifyCode = (bodyData, next) => __awaiter(void 0, void 0, vo
 });
 exports.partnerResendVerifyCode = partnerResendVerifyCode;
 //  partner Add With Location  //
-const partnerAddWithLocation = (token, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Validate if email is already in use
         const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
-        if (partner) {
+        if (!partner) {
             throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
                 code: 400,
-                message: messages_1.MESSAGES.ADMIN.EMAIL_EXISTS,
+                message: messages_1.MESSAGES.ADMIN.PARTNER_NOT_FOUND,
             }));
         }
         // Create partner location(s)
@@ -383,15 +383,29 @@ const partnerAddWithLocation = (token, bodyData, next) => __awaiter(void 0, void
                 city: location.city,
                 state: location.state,
                 phone: location.phone,
-                images: location.images
+                images: location.images,
+                sevices: bodyData.sevices,
+                date: new Date(location.date),
+                startTime: location.startTime, // 09:00
+                endTime: location.endTime, // 03:00
+                googleBussinessPageLink: location.googleBussinessPageLink,
             });
         });
         const locations = yield Promise.all(locationPromises);
-        const updateData = {
-            wellnessTypeId: bodyData.wellnessTypeId,
-            isGoogleVerified: bodyData.isGoogleVerified,
-            checkinRate: bodyData.checkinRate
-        };
+        for (let item of locations) {
+            partner.locations.push(item._id);
+        }
+        partner.wellnessTypeId = bodyData.wellnessTypeId;
+        partner.isGoogleVerified = bodyData.isGoogleVerified;
+        partner.checkinRate = bodyData.checkinRate;
+        yield partner.save();
+        // Get welcome email template to send email
+        let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/welcome.ejs", { name: partner.name }, { async: true });
+        let mailResponse = MailerUtilities_1.MailerUtilities.sendSendgridMail({
+            recipient_email: [bodyData.email],
+            subject: "Registration Success",
+            text: messageHtml,
+        });
         // Return success response
         return Utilities_1.Utilities.sendResponsData({
             code: 200,

@@ -128,12 +128,11 @@ export default [
 
   // add partner //  
   {
-    path: partnerPathURL + "/add",
+    path: partnerPathURL + "add",
     method: "post",
     handler: [
-      checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {
-        const result = await partnerAddWithLocation(req.get("Authorization"), req.body, next);
+        const result = await partnerAddWithLocation( req.body, next);
         res.status(200).send(result);
       },
     ],
