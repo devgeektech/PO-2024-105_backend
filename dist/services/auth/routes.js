@@ -116,13 +116,14 @@ exports.default = [
             }),
         ],
     },
-    // resend verify code  //
+    // add partner //  
     {
-        path: partnerPathURL + "resendVerifyCode",
-        method: "put",
+        path: partnerPathURL + "/add",
+        method: "post",
         handler: [
+            check_1.checkAuthenticate,
             (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-                const result = yield (0, controller_1.partnerResendVerifyCode)(req.body, next);
+                const result = yield (0, controller_1.partnerAddWithLocation)(req.get("Authorization"), req.body, next);
                 res.status(200).send(result);
             }),
         ],

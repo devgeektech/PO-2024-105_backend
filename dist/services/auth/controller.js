@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -49,6 +49,7 @@ const MailerUtilities_1 = require("../../utils/MailerUtilities");
 const utils_1 = require("../../utils");
 const messages_1 = require("../../constants/messages");
 const partner_1 = require("../../db/partner");
+const partnerLocations_1 = require("../../db/partnerLocations");
 //********************  admin controller  ***********************************//
 const adminSignUp = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -363,6 +364,46 @@ const partnerResendVerifyCode = (bodyData, next) => __awaiter(void 0, void 0, vo
     }
 });
 exports.partnerResendVerifyCode = partnerResendVerifyCode;
+//  partner Add With Location  //
+const partnerAddWithLocation = (token, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // Validate if email is already in use
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.ADMIN.EMAIL_EXISTS,
+            }));
+        }
+        // Create partner location(s)
+        const locationPromises = bodyData.locations.map((location) => {
+            return partnerLocations_1.PartnerLocationModel.create({
+                partnerId: partner === null || partner === void 0 ? void 0 : partner._id,
+                address: location.address,
+                city: location.city,
+                state: location.state,
+                phone: location.phone,
+                images: location.images
+            });
+        });
+        const locations = yield Promise.all(locationPromises);
+        const updateData = {
+            wellnessTypeId: bodyData.wellnessTypeId,
+            isGoogleVerified: bodyData.isGoogleVerified,
+            checkinRate: bodyData.checkinRate
+        };
+        // Return success response
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.ADMIN.PARTNER_CREATED,
+            data: { partner, locations },
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerAddWithLocation = partnerAddWithLocation;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

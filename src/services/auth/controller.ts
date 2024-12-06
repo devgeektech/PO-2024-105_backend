@@ -12,6 +12,7 @@ import { generateVerificationLink } from "../../utils";
 import { MESSAGES } from "../../constants/messages";
 import { NextFunction } from "express";
 import { PartnerModel } from "../../db/partner";
+import { PartnerLocationModel } from "../../db/partnerLocations";
 
 //********************  admin controller  ***********************************//
 export const adminSignUp = async () => {
@@ -336,7 +337,7 @@ export const partnerVerifyCode = async (bodyData: any, next: any) => {
 //  partner Resend Verify Code  //
 export const partnerResendVerifyCode = async (bodyData: any, next: any) => {
   try {
-    let partner:any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    let partner: any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
     if (!partner) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
@@ -376,6 +377,50 @@ export const partnerResendVerifyCode = async (bodyData: any, next: any) => {
     next(error);
   }
 }
+
+//  partner Add With Location  //
+export const partnerAddWithLocation = async (token: any, bodyData: any, next: any) => {
+  try {
+    // Validate if email is already in use
+    const partner:any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.ADMIN.EMAIL_EXISTS,
+        })
+      );
+    }
+
+    // Create partner location(s)
+    const locationPromises = bodyData.locations.map((location: any) => {
+      return PartnerLocationModel.create({
+        partnerId: partner?._id,
+        address: location.address,
+        city: location.city,
+        state: location.state,
+        phone: location.phone,
+        images: location.images
+      });
+    });
+    const locations = await Promise.all(locationPromises);
+
+    const updateData = {
+      wellnessTypeId: bodyData.wellnessTypeId,
+      isGoogleVerified: bodyData.isGoogleVerified,
+      checkinRate: bodyData.checkinRate
+    }
+
+    // Return success response
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_CREATED,
+      data: { partner, locations },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 
 

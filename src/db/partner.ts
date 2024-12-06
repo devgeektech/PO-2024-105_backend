@@ -41,6 +41,10 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  checkinRate: {
+    type: String,
+    default: '',
+  },
   isGoogleVerified: {
     type: Boolean,
     default: false

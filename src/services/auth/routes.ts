@@ -8,7 +8,7 @@ import {
   partnerSignup,
   partnerVerifyCode,
   partnerResendVerifyCode,
-
+  partnerAddWithLocation,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -126,18 +126,19 @@ export default [
     ],
   },
 
-
-  // resend verify code  //
+  // add partner //  
   {
-    path: partnerPathURL + "resendVerifyCode",
-    method: "put",
+    path: partnerPathURL + "/add",
+    method: "post",
     handler: [
+      checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {
-        const result = await partnerResendVerifyCode(req.body, next);
+        const result = await partnerAddWithLocation(req.get("Authorization"), req.body, next);
         res.status(200).send(result);
       },
     ],
   },
+
 
 
   //  login  //
