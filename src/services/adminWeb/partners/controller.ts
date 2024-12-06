@@ -28,21 +28,31 @@ export const addPartnerWithLocation = async (token: any, bodyData: any, next: an
       name: bodyData.name,
       businessName: bodyData.businessName,
       email: bodyData.email,
-      password: bodyData.password, // Hash the password if required
+      password: bodyData.password,
       phone: bodyData.phone,
-      gender: bodyData.gender
+      gender: bodyData.gender,
+      image: bodyData.image,
+      businessWebsite: bodyData.businessWebsite,
+      wellnessTypeId: bodyData.wellnessTypeId,
+      locations: bodyData.locations,
+      otp: bodyData.otp
     };
     const partner = await PartnerModel.create(partnerData);
 
     // Create partner location(s)
     const locationPromises = bodyData.locations.map((location: any) => {
       return PartnerLocationModel.create({
-        partnerId: partner._id,
+        partnerId: new mongoose.Types.ObjectId(partner._id),
         address: location.address,
         city: location.city,
         state: location.state,
         phone: location.phone,
-        images: location.images
+        images: location.images,
+        sevices: location.servivces,
+        date: new Date(location.date),
+        startTime: location.startTime, // 09:00
+        endTime: location.endTime, // 03:00
+        googleBussinessPageLink: location.googleBussinessPageLink,
       });
     });
 
