@@ -127,17 +127,28 @@ exports.default = [
             }),
         ],
     },
-    //  login  //
-    // {
-    //   path: partnerPathURL + "login",
-    //   method: "post",
-    //   handler: [
-    //     async (req: Request, res: Response, next: NextFunction) => {
-    //       const result = await partnerLogin(req.body, next);
-    //       res.status(200).send(result);
-    //     },
-    //   ],
-    // },
+    // create new password On-board //  
+    {
+        path: partnerPathURL + "createNewPassword",
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerCreateNewPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    //  partner login  //
+    {
+        path: partnerPathURL + "login",
+        method: "post",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerLogin)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
     //***********************   MEMBER   *************************//
     //  register  //
     {

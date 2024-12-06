@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -406,7 +406,6 @@ const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, voi
             subject: "Registration Success",
             text: messageHtml,
         });
-        // Return success response
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: messages_1.MESSAGES.ADMIN.PARTNER_CREATED,
@@ -418,6 +417,68 @@ const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, voi
     }
 });
 exports.partnerAddWithLocation = partnerAddWithLocation;
+//   create new password On-board  //
+const partnerCreateNewPassword = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+            }));
+        }
+        const pass = yield Utilities_1.Utilities.cryptPassword(bodyData.password);
+        partner.password = pass;
+        partner.onBoarded = true;
+        yield partner.save();
+        delete partner.password;
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.ADMIN.PARTNER_CREATED,
+            data: partner
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerCreateNewPassword = partnerCreateNewPassword;
+//  partner Login  //
+const partnerLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+        if (!partner) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+        const passwordMatch = yield Utilities_1.Utilities.VerifyPassword(bodyData.password, partner.password);
+        if (!passwordMatch) {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.INVALID_CREDENTIAL,
+            }));
+        }
+        let partnerToken = yield Utilities_1.Utilities.createJWTToken({
+            id: partner._id,
+            email: partner.email,
+            name: partner.name || "",
+        });
+        partner.token = partnerToken;
+        yield partner.save();
+        delete partner.password;
+        return Utilities_1.Utilities.sendResponsData({
+            code: 200,
+            message: messages_1.MESSAGES.LOGIN_SUCCESS,
+            data: partner,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerLogin = partnerLogin;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

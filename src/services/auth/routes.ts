@@ -9,6 +9,8 @@ import {
   partnerVerifyCode,
   partnerResendVerifyCode,
   partnerAddWithLocation,
+  partnerCreateNewPassword,
+  partnerLogin,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -138,19 +140,29 @@ export default [
     ],
   },
 
+  // create new password On-board //  
+  {
+    path: partnerPathURL + "createNewPassword",
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerCreateNewPassword( req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
 
-
-  //  login  //
-  // {
-  //   path: partnerPathURL + "login",
-  //   method: "post",
-  //   handler: [
-  //     async (req: Request, res: Response, next: NextFunction) => {
-  //       const result = await partnerLogin(req.body, next);
-  //       res.status(200).send(result);
-  //     },
-  //   ],
-  // },
+  //  partner login  //
+  {
+    path: partnerPathURL + "login",
+    method: "post",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerLogin(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
 
 
   //***********************   MEMBER   *************************//

@@ -409,7 +409,7 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
       });
     });
     const locations = await Promise.all(locationPromises);
-    for(let item of locations){
+    for (let item of locations) {
       partner.locations.push(item._id)
     }
 
@@ -418,19 +418,18 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
     partner.checkinRate = bodyData.checkinRate;
     await partner.save();
 
-      // Get welcome email template to send email
-      let messageHtml = await ejs.renderFile(
-        process.cwd() + "/src/views/welcome.ejs",
-        { name: partner.name },
-        { async: true }
-      );
-      let mailResponse = MailerUtilities.sendSendgridMail({
-        recipient_email: [bodyData.email],
-        subject: "Registration Success",
-        text: messageHtml,
-      });
+    // Get welcome email template to send email
+    let messageHtml = await ejs.renderFile(
+      process.cwd() + "/src/views/welcome.ejs",
+      { name: partner.name },
+      { async: true }
+    );
+    let mailResponse = MailerUtilities.sendSendgridMail({
+      recipient_email: [bodyData.email],
+      subject: "Registration Success",
+      text: messageHtml,
+    });
 
-    // Return success response
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.ADMIN.PARTNER_CREATED,
@@ -440,6 +439,78 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
     next(error);
   }
 };
+
+//   create new password On-board  //
+export const partnerCreateNewPassword = async (bodyData: any, next: any) => {
+  try {
+    const partner: any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });
+    if (!partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+        })
+      );
+    }
+
+    const pass = await Utilities.cryptPassword(bodyData.password);
+    partner.password = pass;
+    partner.onBoarded =true;
+    await partner.save();
+    delete partner.password;
+
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_CREATED,
+      data: partner
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+//  partner Login  //
+export const partnerLogin = async (bodyData: any, next: any) => {
+  try {
+    const partner: any = await PartnerModel.findOne({email: bodyData.email, isDeleted: false});
+    if (!partner) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+
+    const passwordMatch = await Utilities.VerifyPassword(bodyData.password, partner.password);
+    if (!passwordMatch) {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.INVALID_CREDENTIAL,
+        })
+      );
+    }
+
+    let partnerToken = await Utilities.createJWTToken({
+      id: partner._id,
+      email: partner.email,
+      name: partner.name || "",
+    });
+    partner.token = partnerToken;
+    await partner.save();
+
+    delete partner.password;
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.LOGIN_SUCCESS,
+      data: partner,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 
