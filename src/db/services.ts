@@ -5,6 +5,10 @@ const servicesSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  description: {
+    type: String,
+    default: ""
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',

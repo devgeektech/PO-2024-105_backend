@@ -25,6 +25,7 @@ export const addService = async (token: any, bodyData: any, next: any) => {
 
     const serviceData = {
       name: bodyData.name.toLowerCase(),
+      description: bodyData.description,
       createdBy: new mongoose.Types.ObjectId(decoded.id),
     };
     const result = await servicesModel.create(serviceData);
@@ -40,12 +41,17 @@ export const addService = async (token: any, bodyData: any, next: any) => {
 };
 
 // Get all services
-export const getAllServices = async (query:any, next: any) => {
+export const getAllServices = async (queryData: any, next: any) => {
   try {
-    let skip = parseInt(query.skip) || 0;
-    let limit = parseInt(query.limit) || 10;
-    const services = await servicesModel.find({ isDeleted: false }).skip(skip).limit(limit);
-    const totalCounts = await servicesModel.countDocuments({ isDeleted: false });
+    let skip = parseInt(queryData.skip) || 0;
+    let limit = parseInt(queryData.limit) || 10;
+    let query: any = [{ isDeleted: false }];
+    if (queryData.search) {
+      query.push({ name: new RegExp(queryData.search, 'i') })
+    }
+
+    const services = await servicesModel.find({ $and: query }).skip(skip).limit(limit);
+    const totalCounts = await servicesModel.countDocuments({ $and: query });
 
     if (!services || services.length === 0) {
       throw new HTTP400Error(
@@ -104,6 +110,7 @@ export const updateService = async (params: any, bodyData: any, next: any) => {
     }
 
     service.name = bodyData.name?.toLowerCase() || service.name;
+    service.description = bodyData.description;
     await service.save();
 
     return Utilities.sendResponsData({
