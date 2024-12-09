@@ -53,7 +53,7 @@ export const getAllServices = async (queryData: any, next: any) => {
     const services = await servicesModel.find({ $and: query }).skip(skip).limit(limit);
     const totalCounts = await servicesModel.countDocuments({ $and: query });
 
-    if (!services || services.length === 0) {
+    if ((!services || services.length === 0) && !queryData.search) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,

@@ -85,7 +85,7 @@ export const getAllWellnessTypes = async (queryData:any, next: any) => {
     let wellnessTypes: any = await wellnessTypeModel.find({ $and: query}).skip(skip).limit(limit);
     let totalCount:number = await wellnessTypeModel.countDocuments({ $and: query});
 
-    if (!wellnessTypes || wellnessTypes.length === 0) {
+    if ((!wellnessTypes || wellnessTypes.length === 0 ) && !queryData.search) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,

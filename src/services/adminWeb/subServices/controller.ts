@@ -65,7 +65,7 @@ export const getAllSubServices = async (queryData:any, next: any) => {
     const subServices = await subServicesModel.find({ $and: query }).skip(skip).limit(limit).populate('serviceId');
     let totalCounts = await subServicesModel.countDocuments({ $and: query });
 
-    if (!subServices || subServices.length === 0) {
+    if ((!subServices || subServices.length === 0) && !queryData.search) {
       throw new HTTP400Error(
         Utilities.sendResponsData({
           code: 400,
