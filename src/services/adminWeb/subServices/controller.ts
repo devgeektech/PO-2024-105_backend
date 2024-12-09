@@ -36,6 +36,7 @@ export const addSubService = async (token: any, bodyData: any, next: any) => {
 
     const subServiceData = {
       name: bodyData.name.toLowerCase(),
+      description: bodyData.description,
       createdBy: (decoded.id),
       serviceId: new mongoose.Types.ObjectId(bodyData.serviceId),
     };
@@ -117,6 +118,7 @@ export const updateSubService = async (params: any, bodyData: any, next: any) =>
     }
 
     subService.name = bodyData.name?.toLowerCase() || subService.name;
+    subService.description = bodyData.description;
     subService.serviceId = bodyData.serviceId || subService.serviceId;
     await subService.save();
 
