@@ -73,12 +73,17 @@ export const updateWellnessType = async (params: any, bodyData: any, files: any,
 }
 
 //  get Wellness Types //
-export const getAllWellnessTypes = async (query:any, next: any) => {
+export const getAllWellnessTypes = async (queryData:any, next: any) => {
   try {
-    let skip = parseInt(query.skip) || 0;
-    let limit = parseInt(query.limit) || 10;
-    let wellnessTypes: any = await wellnessTypeModel.find({isDeleted:false}).skip(skip).limit(limit);
-    let totalCount:number = await wellnessTypeModel.countDocuments({isDeleted:false});
+    let skip = parseInt(queryData.skip) || 0;
+    let limit = parseInt(queryData.limit) || 10;
+    let query: any = [{ isDeleted: false }];
+    if (queryData.search) {
+      query.push({ name: new RegExp(queryData.search, 'i') })
+    }
+
+    let wellnessTypes: any = await wellnessTypeModel.find({ $and: query}).skip(skip).limit(limit);
+    let totalCount:number = await wellnessTypeModel.countDocuments({ $and: query});
 
     if (!wellnessTypes || wellnessTypes.length === 0) {
       throw new HTTP400Error(

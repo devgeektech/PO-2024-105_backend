@@ -53,12 +53,17 @@ export const addSubService = async (token: any, bodyData: any, next: any) => {
 };
 
 // Get all sub-services
-export const getAllSubServices = async (query:any, next: any) => {
+export const getAllSubServices = async (queryData:any, next: any) => {
   try {
-    let skip = parseInt(query.skip) || 0;
-    let limit = parseInt(query.limit) || 10;
-    const subServices = await subServicesModel.find({ isDeleted: false }).skip(skip).limit(limit).populate('serviceId');
-    let totalCounts = await subServicesModel.countDocuments({isDeleted: false});
+    let skip = parseInt(queryData.skip) || 0;
+    let limit = parseInt(queryData.limit) || 10;
+    let query: any = [{ isDeleted: false }];
+    if (queryData.search) {
+      query.push({ name: new RegExp(queryData.search, 'i') })
+    }
+
+    const subServices = await subServicesModel.find({ $and: query }).skip(skip).limit(limit).populate('serviceId');
+    let totalCounts = await subServicesModel.countDocuments({ $and: query });
 
     if (!subServices || subServices.length === 0) {
       throw new HTTP400Error(
