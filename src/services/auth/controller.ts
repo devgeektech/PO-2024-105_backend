@@ -221,7 +221,7 @@ export const adminChangePassword = async (token: any, bodyData: any, next: any) 
       if (match) {
         let hashedPassword = await Utilities.cryptPassword(newPassword);
         adminRes.password = hashedPassword;
-        adminRes.save();
+        await adminRes.save();
         return Utilities.sendResponsData({
           code: 200,
           message: MESSAGES.PASSWORD_UPDATED,
@@ -602,6 +602,84 @@ export const partnerVerifyResetLink = async (params: any, query: any, next: Next
     next(error);
   }
 }
+
+//  partner Reset Password  //
+export const partnerResetPassword = async (body: any, next: any) => {
+  try {
+    let partner: any = await PartnerModel.findOne({ email: body.email, isDeleted: false });
+    if (partner) {
+      const pass = await Utilities.cryptPassword(body.password);
+      let messageHtml = await ejs.renderFile(
+        process.cwd() + "/src/views/changePassword.email.ejs",
+        { name: partner.name.charAt(0).toUpperCase() + partner.name.slice(1) },
+        { async: true }
+      );
+      await MailerUtilities.sendSendgridMail({
+        recipient_email: [partner.email],
+        subject: "Change Password",
+        text: messageHtml,
+      });
+
+      partner.password = pass;
+      await partner.save();
+      return Utilities.sendResponsData({
+        code: 200,
+        message: MESSAGES.PASSWORD_UPDATED,
+        data: partner
+      });
+    } else {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+  } catch (error) {
+    next(error)
+  }
+};
+
+//  partner Change Password  //
+export const partnerChangePassword = async (token: any, bodyData: any, next: any) => {
+  try {
+    const { oldPassword, newPassword } = bodyData;
+    const decoded: any = await Utilities.getDecoded(token);
+    let partner: any = await UserModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
+
+    if (partner) {
+      const match = await Utilities.VerifyPassword(oldPassword, partner.password);
+      if (match) {
+        let hashedPassword = await Utilities.cryptPassword(newPassword);
+        partner.password = hashedPassword;
+        await partner.save();
+        return Utilities.sendResponsData({
+          code: 200,
+          message: MESSAGES.PASSWORD_UPDATED
+        });
+      } else {
+        throw new HTTP400Error(
+          Utilities.sendResponsData({
+            code: 400,
+            message: MESSAGES.INVALID_PASSWORD
+          })
+        );
+      }
+    } else {
+      throw new HTTP400Error(
+        Utilities.sendResponsData({
+          code: 400,
+          message: MESSAGES.USER_NOT_EXISTS,
+        })
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+
 
 
 

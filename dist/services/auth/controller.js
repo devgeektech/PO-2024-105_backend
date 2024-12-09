@@ -35,7 +35,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerVerifyResetLink = exports.partnerForgotPassword = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
+exports.getMemberByEmail = exports.checkEmailExistence = exports.verifyAccount = exports.deleteUserbyAdmin = exports.memberRegister = exports.memberLoginByToken = exports.memberLogin = exports.partnerChangePassword = exports.partnerResetPassword = exports.partnerVerifyResetLink = exports.partnerForgotPassword = exports.partnerLogin = exports.partnerCreateNewPassword = exports.partnerAddWithLocation = exports.partnerResendVerifyCode = exports.partnerVerifyCode = exports.partnerSignup = exports.adminChangePassword = exports.createNewPassword = exports.verifyResetLink = exports.forgotPassword = exports.adminLogin = exports.adminSignUp = void 0;
 const ejs_1 = __importDefault(require("ejs"));
 const httpErrors_1 = require("../../utils/httpErrors");
 const config_1 = __importDefault(require("config"));
@@ -234,7 +234,7 @@ const adminChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0,
             if (match) {
                 let hashedPassword = yield Utilities_1.Utilities.cryptPassword(newPassword);
                 adminRes.password = hashedPassword;
-                adminRes.save();
+                yield adminRes.save();
                 return Utilities_1.Utilities.sendResponsData({
                     code: 200,
                     message: messages_1.MESSAGES.PASSWORD_UPDATED,
@@ -556,6 +556,74 @@ const partnerVerifyResetLink = (params, query, next) => __awaiter(void 0, void 0
     }
 });
 exports.partnerVerifyResetLink = partnerVerifyResetLink;
+//  partner Reset Password  //
+const partnerResetPassword = (body, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let partner = yield partner_1.PartnerModel.findOne({ email: body.email, isDeleted: false });
+        if (partner) {
+            const pass = yield Utilities_1.Utilities.cryptPassword(body.password);
+            let messageHtml = yield ejs_1.default.renderFile(process.cwd() + "/src/views/changePassword.email.ejs", { name: partner.name.charAt(0).toUpperCase() + partner.name.slice(1) }, { async: true });
+            yield MailerUtilities_1.MailerUtilities.sendSendgridMail({
+                recipient_email: [partner.email],
+                subject: "Change Password",
+                text: messageHtml,
+            });
+            partner.password = pass;
+            yield partner.save();
+            return Utilities_1.Utilities.sendResponsData({
+                code: 200,
+                message: messages_1.MESSAGES.PASSWORD_UPDATED,
+                data: partner
+            });
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerResetPassword = partnerResetPassword;
+//  partner Change Password  //
+const partnerChangePassword = (token, bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { oldPassword, newPassword } = bodyData;
+        const decoded = yield Utilities_1.Utilities.getDecoded(token);
+        let partner = yield user_1.UserModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
+        if (partner) {
+            const match = yield Utilities_1.Utilities.VerifyPassword(oldPassword, partner.password);
+            if (match) {
+                let hashedPassword = yield Utilities_1.Utilities.cryptPassword(newPassword);
+                partner.password = hashedPassword;
+                yield partner.save();
+                return Utilities_1.Utilities.sendResponsData({
+                    code: 200,
+                    message: messages_1.MESSAGES.PASSWORD_UPDATED
+                });
+            }
+            else {
+                throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                    code: 400,
+                    message: messages_1.MESSAGES.INVALID_PASSWORD
+                }));
+            }
+        }
+        else {
+            throw new httpErrors_1.HTTP400Error(Utilities_1.Utilities.sendResponsData({
+                code: 400,
+                message: messages_1.MESSAGES.USER_NOT_EXISTS,
+            }));
+        }
+    }
+    catch (error) {
+        next(error);
+    }
+});
+exports.partnerChangePassword = partnerChangePassword;
 //***********************   MEMBER   *************************//
 //  common api for login and ragister
 const memberLogin = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {

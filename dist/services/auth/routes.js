@@ -172,6 +172,29 @@ exports.default = [
             }),
         ],
     },
+    // partner reset password  //
+    {
+        path: partnerPathURL + 'resetPassword',
+        method: "put",
+        handler: [
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerResetPassword)(req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
+    // partner change password  //
+    {
+        path: partnerPathURL + "changePassword",
+        method: "put",
+        handler: [
+            check_1.checkAuthenticate,
+            (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+                const result = yield (0, controller_1.partnerChangePassword)(req.get(config_1.default.get("AUTHORIZATION")), req.body, next);
+                res.status(200).send(result);
+            }),
+        ],
+    },
     //***********************   MEMBER   *************************//
     //  register  //
     {

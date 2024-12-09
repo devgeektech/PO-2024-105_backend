@@ -13,6 +13,8 @@ import {
   partnerLogin,
   partnerForgotPassword,
   partnerVerifyResetLink,
+  partnerResetPassword,
+  partnerChangePassword,
   memberLogin,
   memberLoginByToken,
   memberRegister,
@@ -190,6 +192,33 @@ export default [
       },
     ],
   },
+
+  // partner reset password  //
+  {
+    path: partnerPathURL + 'resetPassword',
+    method: "put",
+    handler: [
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerResetPassword(req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+  // partner change password  //
+  {
+    path: partnerPathURL + "changePassword",
+    method: "put",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const result = await partnerChangePassword(req.get(config.get("AUTHORIZATION")), req.body, next);
+        res.status(200).send(result);
+      },
+    ],
+  },
+
+
 
 
   //***********************   MEMBER   *************************//
