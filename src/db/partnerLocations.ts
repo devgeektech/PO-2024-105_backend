@@ -1,7 +1,6 @@
 import * as mongoose from 'mongoose';
 
 const partnerLocationSchema = new mongoose.Schema({
-  // partner
   partnerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'partners'
@@ -18,6 +17,24 @@ const partnerLocationSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  zipcode: {
+    type: String,
+  },
+  location: {
+    type: {
+      type: String, 
+      enum: ["Point"]
+    },
+    coordinates: {
+      type: [Number], 
+
+    },
+  },
+  weekDays: [
+    {
+      type: String,
+    }
+  ],
   phone: {
     type: String
   },

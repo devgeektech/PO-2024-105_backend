@@ -51,7 +51,9 @@ export const MESSAGES = {
       EMAIL_EXISTS: "A partner with this email address already exists. Please use a different email",
       PARTNER_CREATED: "Partner and associated locations created successfully",
       PARTNER_NOT_FOUND: "The requested partner was not found",
+      PARTNER_LOCATION_NOT_FOUND: "The requested partner location was not found",
       PARTNER_UPDATED: "The partner has been successfully updated",
+      PARTNER_PROFILE_UPDATED: "The partner profile has been successfully updated",
       PARTNERS_FETCHED: "Partners have been successfully retrieved",
       PARTNER_FETCHED: "Partner has been successfully retrieved",
       PARTNER_DELETED: "Partner deleted successfully"

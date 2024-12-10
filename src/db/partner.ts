@@ -20,6 +20,10 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  description: {
+    type: String,
+    default: ""
+  },
   image: {
     type: String,
     default: ""
