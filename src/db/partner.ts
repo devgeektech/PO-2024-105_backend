@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import { GENDERS} from '../constants';
+import { GENDERS, PARTNER_ACCOUNT_STATUS} from '../constants';
 
 const partnerSchema = new mongoose.Schema({
   // partner
@@ -33,13 +33,18 @@ const partnerSchema = new mongoose.Schema({
     enum: GENDERS,
     default: "",
   },
-  approved: {
-    type: Boolean,
-    default: false
+  status: {
+    type: String,
+    enum: PARTNER_ACCOUNT_STATUS,
+    default: 'pending'
   },
   businessWebsite: {
     type: String,
     default: '',
+  },
+  businessListedDate: {
+    type: Date,
+    default: null
   },
   checkinRate: {
     type: String,

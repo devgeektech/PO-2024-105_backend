@@ -58,7 +58,7 @@ export const addPartnerWithLocation = async (bodyData: any, next: any) => {
     let locations = await Promise.all(locationPromises);
 
     let loc = []
-    loc = locations.map((item)=>{
+    loc = locations.map((item) => {
       return item._id
     })
 
@@ -98,7 +98,6 @@ export const editPartnerWithLocation = async (partnerId: string, bodyData: any, 
       image: bodyData.image || partner.image,
       businessWebsite: bodyData.businessWebsite || partner.businessWebsite,
       wellnessTypeId: bodyData.wellnessTypeId || partner.wellnessTypeId,
-      approved: bodyData.approved || partner.approved
     };
     await PartnerModel.findByIdAndUpdate(partnerId, updatedPartnerData, { new: true });
 
@@ -127,10 +126,10 @@ export const editPartnerWithLocation = async (partnerId: string, bodyData: any, 
       let locationResponse = await Promise.all(locationPromises);
 
       let loc = []
-      loc = locationResponse.map((item)=>{
+      loc = locationResponse.map((item) => {
         return item._id
       })
- 
+
       partner.locations = loc;
       partner.save()
     }
@@ -148,14 +147,41 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
   try {
     let skip = parseInt(query.skip) || 0;
     let limit = parseInt(query.limit) || 10;
+    let sortOrder: any = query.sortOrder === 'desc' ? -1 : 1;
+    const filters: any = [{ isDeleted: false }];
 
-    let sortField:any = 'createdAt';
-    let sortOrder:any = query.sortOrder === 'desc' ? -1 : 1;
-    // Fetch partners with optional filtering
-    const filters: any = { isDeleted: false };
+    const partners = await PartnerModel.aggregate([
+      {
+        $match: { $and: filters }
+      },
+      {
+        $lookup: {
+          from: 'wellnesstypes',
+          localField: 'wellnessTypeId',
+          foreignField: '_id',
+          as: 'businessType'
+        }
+      },
+      {
+        $unwind: {
+          path: '$businessType',
+          preserveNullAndEmptyArrays: false
+        },
+      },
+      {
+        "$sort":{
+           "createdAt": sortOrder
+        }
+     },
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      },
+    ])
+    let totalCounts = await PartnerModel.countDocuments({ isDeleted: false });
 
-    const partners = await PartnerModel.find(filters).sort({ [sortField]: sortOrder }).skip(skip).limit(limit).populate('locations').lean();
-    let totalCounts = await PartnerModel.countDocuments({isDeleted: false});
     // Fetch locations for each partner
     const partnerDetails = await Promise.all(
       partners.map(async (partner: any) => {
