@@ -9,12 +9,14 @@ const routes_3 = __importDefault(require("./adminWeb/wellnessTypes/routes"));
 const routes_4 = __importDefault(require("./adminWeb/services/routes"));
 const routes_5 = __importDefault(require("./adminWeb/subServices/routes"));
 const routes_6 = __importDefault(require("./adminWeb/partners/routes"));
+const routes_7 = __importDefault(require("./partner/routes"));
 exports.default = [
     ...routes_1.default,
     ...routes_2.default,
     ...routes_3.default,
     ...routes_4.default,
     ...routes_5.default,
-    ...routes_6.default
+    ...routes_6.default,
+    ...routes_7.default
 ];
 //# sourceMappingURL=index.js.map
