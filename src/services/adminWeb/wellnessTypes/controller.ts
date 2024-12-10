@@ -23,9 +23,9 @@ export const addWellnessType = async (token:any, bodyData: any, files: any, next
     }
 
     if (files && files.length) {
-      imageUrl = await FileUpload.uploadFileToAWS(files[0], 'wellnesstype')
+      bodyData.image = files[0].filename;
     }
-    bodyData.image = imageUrl;
+
     bodyData.name = bodyData.name.toLowerCase();
     bodyData.createdBy = new mongoose.Types.ObjectId(decoded.id)
     const result = await wellnessTypeModel.create(bodyData);
@@ -53,12 +53,19 @@ export const updateWellnessType = async (params: any, bodyData: any, files: any,
       );
     }
 
+    console.log(bodyData,">>> body Data >>>>")
+
+    // if (files && files.length) {
+    //   let imageUrl = await FileUpload.uploadFileToAWS(files[0], 'wellnesstype');
+    //   wellnessType.image = imageUrl;
+    // }
+
     if (files && files.length) {
-      let imageUrl = await FileUpload.uploadFileToAWS(files[0], 'wellnesstype');
-      wellnessType.image = imageUrl;
+      console.log(files[0],">>>> files >>>>")
+      wellnessType.image = files[0].filename;
     }
 
-    wellnessType.name = bodyData.name.toLowerCase() || wellnessType.name;
+    wellnessType.name = bodyData?.name?.toLowerCase() || wellnessType?.name;
     wellnessType.description = bodyData.description || wellnessType.description;
     await wellnessType.save();
 
