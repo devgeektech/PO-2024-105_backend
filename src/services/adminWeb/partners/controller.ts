@@ -5,6 +5,8 @@ import { MESSAGES } from "../../../constants/messages";
 import mongoose from "mongoose";
 import { PartnerModel } from "../../../db/partner";
 import { PartnerLocationModel } from "../../../db/partnerLocations";
+import { MailerUtilities } from "../../../utils/MailerUtilities";
+import ejs from "ejs";
 
 export const addPartnerWithLocation = async (bodyData: any, next: any) => {
   try {
@@ -169,10 +171,10 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
         },
       },
       {
-        "$sort":{
-           "createdAt": sortOrder
+        "$sort": {
+          "createdAt": sortOrder
         }
-     },
+      },
       {
         $skip: skip
       },
@@ -185,8 +187,33 @@ export const getAllPartners = async (token: any, query: any, next: any) => {
     // Fetch locations for each partner
     const partnerDetails = await Promise.all(
       partners.map(async (partner: any) => {
-        const locations = await PartnerLocationModel.find({ partnerId: partner._id }).lean();
-        return { ...partner, locations };
+        // const locations = await PartnerLocationModel.find({ partnerId: partner._id }).lean();
+        const locations = await PartnerLocationModel.aggregate([
+          {
+            $match: {partnerId: partner._id, isDeleted: false }
+          },
+          {
+            $lookup: {
+              from: 'services',
+              localField: 'services',
+              foreignField: '_id',
+              as: 'services'
+            }
+          },
+          {
+            $addFields: {
+              serviceNames: {
+                $map: {
+                  input: '$services',
+                  as: 'service',
+                  in: '$$service.name',
+                },
+              },
+            },
+          },
+        ]);
+        const allServiceNames = [...new Set(locations.flatMap(item => item.serviceNames))];
+        return { ...partner, locations, allServiceNames };
       })
     );
 
@@ -239,7 +266,6 @@ export const getPartnerById = async (partnerId: string, next: any) => {
   }
 };
 
-
 // Service Function to Delete Partner by ID
 export const deletePartnerById = async (partnerId: string, next: any) => {
   try {
@@ -262,6 +288,51 @@ export const deletePartnerById = async (partnerId: string, next: any) => {
         data: null,
       });
     }
+
+    // Return Success Response
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_DELETED,
+      data: partner,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+//  update Partner Status  //
+export const updatePartnerStatus = async (partnerId: string, bodyData:any, next: any) => {
+  try {
+    if (!partnerId) {
+      throw new Error("Partner ID is required");
+    }
+    console.log('bodyData ------------ ',bodyData);
+    const partner = await PartnerModel.findOne({ _id: partnerId, isDeleted: false });
+    if (!partner) {
+      return Utilities.sendResponsData({
+        code: 404,
+        message: MESSAGES.ADMIN.PARTNER_NOT_FOUND,
+        data: null,
+      });
+    }
+
+    partner.checkinRate = bodyData.checkinRate;
+    partner.status = bodyData.status.toLowerCase();
+    partner.rejectionReason = bodyData.rejectionReason || '';
+    console.log('partner ------------ ',partner);
+    await partner.save();
+
+    // Get welcome email template to send email
+    let messageHtml = await ejs.renderFile(
+      process.cwd() + "/src/views/welcome.ejs",
+      { name: partner.name },
+      { async: true }
+    );
+    let mailResponse = MailerUtilities.sendSendgridMail({
+      recipient_email: [bodyData.email],
+      subject: "Registration Success",
+      text: messageHtml,
+    });
 
     // Return Success Response
     return Utilities.sendResponsData({

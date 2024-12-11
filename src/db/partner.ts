@@ -42,6 +42,10 @@ const partnerSchema = new mongoose.Schema({
     enum: PARTNER_ACCOUNT_STATUS,
     default: 'pending'
   },
+  rejectionReason:{
+    type: String,
+    default: ''
+  },
   businessWebsite: {
     type: String,
     default: '',
