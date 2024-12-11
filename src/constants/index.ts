@@ -29,3 +29,5 @@ export const ADVERTING_STATUS = ["available", "booked"];
 export const WELLNESS_BUSINESS_TYPE = ["", "gym", "studio", "wellness services"];
 
 export const PARTNER_ACCOUNT_STATUS = ["pending", "accepted", "rejected"];
+
+export const COMPANY_STATUS = ["active", "rejected"]

@@ -27,7 +27,6 @@ const partnerLocationSchema = new mongoose.Schema({
     },
     coordinates: {
       type: [Number], 
-
     },
   },
   weekDays: [

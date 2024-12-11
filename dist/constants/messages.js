@@ -58,7 +58,12 @@ exports.MESSAGES = {
         PARTNER_PROFILE_UPDATED: "The partner profile has been successfully updated",
         PARTNERS_FETCHED: "Partners have been successfully retrieved",
         PARTNER_FETCHED: "Partner has been successfully retrieved",
-        PARTNER_DELETED: "Partner deleted successfully"
+        PARTNER_DELETED: "Partner deleted successfully",
+        COMPANY_NOT_FOUND: "The requested company was not found",
+        COMPANY_UPDATED: "The company details have been successfully updated",
+        COMPANIES_FETCHED: "The list of companies has been successfully fetched.",
+        COMPANY_FETCHED: "The company details have been successfully fetched.",
+        COMPANY_DELETED: "The company has been successfully deleted."
     },
     PARTNER: {
         VERIFICATION_CODE_SEND: "Account verification code send to email",
