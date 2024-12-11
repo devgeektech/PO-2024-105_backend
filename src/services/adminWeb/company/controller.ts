@@ -31,7 +31,7 @@ export const addCompany = async (bodyData: any, token: any, next: any) => {
       tax: bodyData.tax,
       description: bodyData.description,
       phone: bodyData.phone,
-      status: bodyData.status,
+      status: "active",
       createdBy: new mongoose.Types.ObjectId(decoded.id)
     };
 
@@ -49,6 +49,8 @@ export const addCompany = async (bodyData: any, token: any, next: any) => {
 
 export const editCompany = async (companyId: string, bodyData: any, next: any) => {
   try {
+
+    console.log(bodyData,">>> bodyData >>>>");
     // Validate if company exists
     const company = await CompanyModel.findOne({ _id: new mongoose.Types.ObjectId(companyId), isDeleted: false });
     if (!company) {
@@ -68,7 +70,7 @@ export const editCompany = async (companyId: string, bodyData: any, next: any) =
       tax: bodyData.tax || company.tax,
       description: bodyData.description || company.description,
       phone: bodyData.phone || company.phone,
-      status: bodyData.status || company.status,
+      status: bodyData.status || company.status
     };
 
     await CompanyModel.findByIdAndUpdate(companyId, updatedCompanyData, { new: true });
