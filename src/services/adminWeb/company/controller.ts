@@ -31,7 +31,7 @@ export const addCompany = async (bodyData: any, token: any, next: any) => {
       tax: bodyData.tax,
       description: bodyData.description,
       phone: bodyData.phone,
-      status: bodyData.status,
+      status: "active",
       createdBy: new mongoose.Types.ObjectId(decoded.id)
     };
 
@@ -68,7 +68,7 @@ export const editCompany = async (companyId: string, bodyData: any, next: any) =
       tax: bodyData.tax || company.tax,
       description: bodyData.description || company.description,
       phone: bodyData.phone || company.phone,
-      status: bodyData.status || company.status,
+      status: bodyData.status || company.status
     };
 
     await CompanyModel.findByIdAndUpdate(companyId, updatedCompanyData, { new: true });
@@ -88,7 +88,9 @@ export const getAllCompanies = async (token: any, query: any, next: any) => {
     let limit = parseInt(query.limit) || 10;
     let sortOrder: any = query.sortOrder === 'desc' ? -1 : 1;
     const filters: any = [{ isDeleted: false }];
-
+    if (query.search) {
+      filters.push({ companyName: new RegExp(query.search, 'i') })
+    }
     const companies = await CompanyModel.aggregate([
       {
         $match: { $and: filters }
