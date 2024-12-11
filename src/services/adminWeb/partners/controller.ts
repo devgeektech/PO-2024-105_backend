@@ -330,7 +330,7 @@ export const updatePartnerStatus = async (partnerId: string, bodyData:any, next:
     );
     let mailResponse = MailerUtilities.sendSendgridMail({
       recipient_email: [bodyData.email],
-      subject: "Registration Success",
+      subject: "Status updated",
       text: messageHtml,
     });
 
