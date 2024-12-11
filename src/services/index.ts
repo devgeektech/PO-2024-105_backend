@@ -5,6 +5,7 @@ import servicesRoutes from './adminWeb/services/routes'
 import subServicesRoutes from './adminWeb/subServices/routes'
 import adminPartnerRoutes from './adminWeb/partners/routes'
 import partnerRoutes from './partner/routes'
+import companyRoutes from './adminWeb/company/routes'
 
 export default [
     ...authRoutes,
@@ -13,5 +14,6 @@ export default [
     ...servicesRoutes,
     ...subServicesRoutes,
     ...adminPartnerRoutes,
-    ...partnerRoutes    
+    ...partnerRoutes,
+    ...companyRoutes    
 ];
