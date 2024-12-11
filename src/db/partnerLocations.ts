@@ -42,7 +42,7 @@ const partnerLocationSchema = new mongoose.Schema({
     type: String,
     default: ""
   }],
-  sevices: [
+  services: [
     {
       type: mongoose.Schema.Types.ObjectId
     }

@@ -401,7 +401,7 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
         state: location.state,
         phone: location.phone,
         images: location.images,
-        sevices: bodyData.sevices,
+        services: bodyData.services,
         date: new Date(location.date),
         startTime: location.startTime, // 09:00
         endTime: location.endTime, // 03:00

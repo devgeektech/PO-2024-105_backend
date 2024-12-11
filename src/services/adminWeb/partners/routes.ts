@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import config from "config";
 import { checkAuthenticate } from "./middleware/check";
-import { addPartnerWithLocation, deletePartnerById, editPartnerWithLocation, getAllPartners, getPartnerById } from "./controller";
+import { addPartnerWithLocation, deletePartnerById, editPartnerWithLocation, getAllPartners, getPartnerById, updatePartnerStatus } from "./controller";
 const basePath = config.get("BASE_PATH");
 const userPath = 'adminWeb';
 const userPathURL = basePath + userPath;
@@ -79,6 +79,21 @@ export default [
         res.status(200).send(result);
       },
     ],
+  },
+
+  // update Partner status By Id //
+  {
+    path: userPathURL + "/partner/updateStatus/:id",
+    method: "put",
+    handler: [
+      checkAuthenticate,
+      async (req: Request, res: Response, next: NextFunction) => {
+        const partnerId = req.params.id;
+        const result = await updatePartnerStatus(partnerId, req.body,  next);
+        res.status(200).send(result);
+      },
+    ],
   }
+
 
 ];

@@ -384,7 +384,7 @@ const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, voi
                 state: location.state,
                 phone: location.phone,
                 images: location.images,
-                sevices: bodyData.sevices,
+                services: bodyData.services,
                 date: new Date(location.date),
                 startTime: location.startTime, // 09:00
                 endTime: location.endTime, // 03:00
