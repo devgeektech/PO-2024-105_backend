@@ -100,6 +100,9 @@ export const editPartnerWithLocation = async (partnerId: string, bodyData: any, 
       image: bodyData.image || partner.image,
       businessWebsite: bodyData.businessWebsite || partner.businessWebsite,
       wellnessTypeId: bodyData.wellnessTypeId || partner.wellnessTypeId,
+      description: bodyData.description || partner.description,
+      checkinRate: bodyData.checkinRate || partner.checkinRate,
+      businessListedDate:  bodyData.businessListedDate || partner.businessListedDate,
     };
     await PartnerModel.findByIdAndUpdate(partnerId, updatedPartnerData, { new: true });
 
