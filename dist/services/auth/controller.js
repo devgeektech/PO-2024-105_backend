@@ -417,7 +417,7 @@ const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, voi
     }
 });
 exports.partnerAddWithLocation = partnerAddWithLocation;
-//   create new password On-board  //
+// create new password On-board  //
 const partnerCreateNewPassword = (bodyData, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const partner = yield partner_1.PartnerModel.findOne({ email: bodyData.email, isDeleted: false });

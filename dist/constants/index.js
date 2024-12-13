@@ -1,7 +1,7 @@
 "use strict";
 // type ROLESTYPE = 'admin' | 'employee' | 'fitnessPartner' | 'company'
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COMPANY_STATUS = exports.PARTNER_ACCOUNT_STATUS = exports.WELLNESS_BUSINESS_TYPE = exports.ADVERTING_STATUS = exports.ROOM_TYPES = exports.PLAN_TYPES = exports.EVENT_TYPES = exports.EVENT_STATUS = exports.TASK_STATUS = exports.DEFAULT_ADMIN = exports.GENDERS = exports.ROLES = void 0;
+exports.CLASS_TYPE = exports.CLASS_STATUS = exports.COMPANY_STATUS = exports.PARTNER_ACCOUNT_STATUS = exports.WELLNESS_BUSINESS_TYPE = exports.ADVERTING_STATUS = exports.ROOM_TYPES = exports.PLAN_TYPES = exports.EVENT_TYPES = exports.EVENT_STATUS = exports.TASK_STATUS = exports.DEFAULT_ADMIN = exports.GENDERS = exports.ROLES = void 0;
 exports.ROLES = ['admin', 'employee', 'fitnessPartner', 'company'];
 exports.GENDERS = ['', 'other', 'male', 'female'];
 exports.DEFAULT_ADMIN = {
@@ -22,4 +22,6 @@ exports.ADVERTING_STATUS = ["available", "booked"];
 exports.WELLNESS_BUSINESS_TYPE = ["", "gym", "studio", "wellness services"];
 exports.PARTNER_ACCOUNT_STATUS = ["pending", "accepted", "rejected"];
 exports.COMPANY_STATUS = ["active", "rejected"];
+exports.CLASS_STATUS = ["active", "deactive"];
+exports.CLASS_TYPE = ["thisWeek", "thisMonth", "everyMonth", "thisQuater", "thisYear"];
 //# sourceMappingURL=index.js.map

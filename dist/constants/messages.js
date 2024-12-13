@@ -61,15 +61,22 @@ exports.MESSAGES = {
         PARTNER_DELETED: "Partner deleted successfully",
         COMPANY_NOT_FOUND: "The requested company was not found",
         COMPANY_UPDATED: "The company details have been successfully updated",
-        COMPANIES_FETCHED: "The list of companies has been successfully fetched.",
-        COMPANY_FETCHED: "The company details have been successfully fetched.",
-        COMPANY_DELETED: "The company has been successfully deleted."
+        COMPANIES_FETCHED: "The list of companies has been successfully fetched",
+        COMPANY_FETCHED: "The company details have been successfully fetched",
+        COMPANY_DELETED: "The company has been successfully deleted",
     },
     PARTNER: {
         VERIFICATION_CODE_SEND: "Account verification code send to email",
         INVALID_CODE: "Invalid verification code",
         CODE_EXPIRED: "Verification code expired",
         CODE_VERIFIED: "OTP verified successfully",
+        CLASS_ALREADY_EXISTS: "The class you are trying to create already exists",
+        CLASS_CREATED: "The class has been successfully created",
+        CLASS_NOT_FOUND: "The specified class was not found",
+        CLASS_UPDATED: "The class was successfully updated",
+        CLASSES_FETCHED: "The list of classes has been successfully fetched",
+        INVALID_ID: "Invalid Class Id",
+        CLASS_FETCHED: "The class has been successfully fetched"
     }
 };
 //# sourceMappingURL=messages.js.map

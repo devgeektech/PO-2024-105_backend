@@ -17,7 +17,7 @@ const partnerLocationSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
-  zipcode: {
+  zipCode: {
     type: String,
   },
   location: {
@@ -72,6 +72,8 @@ const partnerLocationSchema = new mongoose.Schema({
 },
   { timestamps: true });
 
+  partnerLocationSchema.index({ location: '2dsphere' });
+
   partnerLocationSchema.set('toJSON', {
   virtuals: false, transform: (doc, ret, Options) => {
     delete ret.password
@@ -79,4 +81,4 @@ const partnerLocationSchema = new mongoose.Schema({
   }
 })
 
-export const PartnerLocationModel = mongoose.model('partnerloaction', partnerLocationSchema);
+export const PartnerLocationModel = mongoose.model('partnerlocation', partnerLocationSchema);

@@ -440,7 +440,7 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
   }
 };
 
-//   create new password On-board  //
+// create new password On-board  //
 export const partnerCreateNewPassword = async (bodyData: any, next: any) => {
   try {
     const partner: any = await PartnerModel.findOne({ email: bodyData.email, isDeleted: false });

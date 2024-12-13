@@ -31,3 +31,7 @@ export const WELLNESS_BUSINESS_TYPE = ["", "gym", "studio", "wellness services"]
 export const PARTNER_ACCOUNT_STATUS = ["pending", "accepted", "rejected"];
 
 export const COMPANY_STATUS = ["active", "rejected"]
+
+export const CLASS_STATUS = ["active", "deactive"]
+
+export const CLASS_TYPE = ["thisWeek","thisMonth","everyMonth","thisQuater","thisYear"]
