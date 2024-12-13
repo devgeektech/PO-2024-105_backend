@@ -46,7 +46,7 @@ export const editPartnerProfile = async (partnerId: string, bodyData: any, files
       address: bodyData.address,
       city: bodyData.city,
       state: bodyData.state,
-      zipcode: bodyData.zipcode,
+      zipCode: bodyData.zipCode,
       location: bodyData.location,
       weekDays: bodyData.weekDays,
       images: images,

@@ -19,6 +19,7 @@ export const createClass = async (token: any, bodyData: any, file: any, next: an
     const classData = {
       ...bodyData,
       video: video,
+      partnerLocation: new mongoose.Types.ObjectId(bodyData.partnerLocation),
       className: bodyData.className.toLowerCase(),
       createdBy: new mongoose.Types.ObjectId(decoded.id),
     };
@@ -91,13 +92,68 @@ export const getAllClasses = async (token: any, query: any, next: any) => {
     let sortOrder: any = query.sortOrder === 'desc' ? -1 : 1;
     const filters: any = [{ isDeleted: false }];
 
-    const classes = await classModel.aggregate([
-      {
-        $match: { $and: filters }
-      },
+    if (query.className) {
+      filters.push({ className: { $regex: query.className, $options: 'i' } });
+    }
+    if (query.partnerName) {
+      filters.push({ 'partnerDetails.name': { $regex: query.partnerName, $options: 'i' } });
+    }
+    if (query.zipCode) {
+      filters.push({ 'partnerLocation.zipCode': { $regex: query.zipCode, $options: 'i' } });
+    }
+    if (query.city) {
+      filters.push({ 'partnerLocation.city': { $regex: query.city, $options: 'i' } });
+    }
+    if (query.address) {
+      filters.push({ 'partnerLocation.address': { $regex: query.address, $options: 'i' } });
+    }
+    if(query.services){
+      query.services = JSON.parse(query.services)
+      if (Array.isArray(query.services)) {
+        const serviceIds = query.services.map((id: string) => new mongoose.Types.ObjectId(id));
+        filters.push({ 'service._id': { $in: serviceIds } });
+      }
+    }
+
+    const geoNearStage:any = [];
+    if (query.latitude && query.longitude) {
+      const latitude = parseFloat(query.latitude);
+      const longitude = parseFloat(query.longitude);
+      const coordinates = [longitude, latitude];
+
+      geoNearStage.push({
+        $geoNear: {
+          near: { type: "Point", coordinates: coordinates },
+          distanceField: "distance",
+          spherical: true,
+          key: "partnerLocation.location",
+          maxDistance: 10 * 1000 // 10 km in meters
+        }
+      });
+    }
+
+    if (query.date) {
+      const date = new Date(query.date);
+      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
+
+      filters.push({
+        $or: [
+          {
+            createdAt: { $gte: startOfDay.toISOString(), $lte: endOfDay.toISOString() },
+          },
+          {
+            createdAt: { $gte: startOfDay.toISOString(), $lte: endOfDay.toISOString() },
+          }
+        ]
+      });
+    }
+
+    let aggregateQuery = [
+      ...geoNearStage,
       {
         $lookup: {
-          from: 'partnerlocation', 
+          from: 'partnerlocations', 
           localField: 'partnerLocation',
           foreignField: '_id',
           as: 'partnerLocation'
@@ -112,36 +168,59 @@ export const getAllClasses = async (token: any, query: any, next: any) => {
         }
       },
       {
+        $lookup: {
+          from: 'services',
+          localField: 'serviceId',
+          foreignField: '_id',
+          as: 'service',
+        },
+      },
+      {
+        $unwind: {
+          path: '$service',
+          preserveNullAndEmptyArrays: false
+        }
+      },
+      {
         $unwind: {
           path: '$partnerDetails',
           preserveNullAndEmptyArrays: false
         }
       },
-      // {
-      //   $unwind: {
-      //     path: '$partnerLocation',
-      //     preserveNullAndEmptyArrays: false
-      //   }
-      // },
+      {
+        $unwind: {
+          path: '$partnerLocation',
+          preserveNullAndEmptyArrays: false
+        }
+      },
+      {
+        $match: { $and: filters }
+      },
       {
         $sort: {
           createdAt: sortOrder
         }
-      },
+      },   
       {
-        $skip: skip
-      },
-      {
-        $limit: limit
+        $facet: {
+          totalRecords: [{ $count: "count" }],
+          paginatedResults: [
+            { $skip: skip },
+            { $limit: limit },
+          ], 
+        }
       }
-    ]);
+    ]
 
-    let totalCounts = await classModel.countDocuments({ isDeleted: false });
+    const result = await classModel.aggregate(aggregateQuery);
+
+    const totalRecord = result[0]?.totalRecords?.[0]?.count || 0;
+    const classes = result[0]?.paginatedResults || [];
 
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.PARTNER.CLASSES_FETCHED,
-      totalRecord: totalCounts,
+      totalRecord: totalRecord,
       data: classes,
     });
   } catch (error) {
