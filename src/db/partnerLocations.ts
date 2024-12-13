@@ -79,4 +79,4 @@ const partnerLocationSchema = new mongoose.Schema({
   }
 })
 
-export const PartnerLocationModel = mongoose.model('partnerloaction', partnerLocationSchema);
+export const PartnerLocationModel = mongoose.model('partnerlocation', partnerLocationSchema);

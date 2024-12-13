@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose';
 import { GENDERS, ROLES } from '../constants';
-import moment from 'moment';
 
 const userSchema = new mongoose.Schema({
   // user
@@ -44,8 +43,6 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-
-  // for company
   companyName: {
     type: String,
     default: '',

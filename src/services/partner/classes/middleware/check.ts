@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from "express";
-import { HTTP400Error, HTTP403Error } from "../../../utils/httpErrors";
+import { HTTP400Error, HTTP403Error } from "../../../../utils/httpErrors";
 import Joi, { any } from "joi";
 import config from "config";
-import { Utilities } from "../../../utils/Utilities";
-import { invalidTokenError, errorMessageHander } from "../../../utils/ErrorHandler";
+import { Utilities } from "../../../../utils/Utilities";
+import { invalidTokenError, errorMessageHander } from "../../../../utils/ErrorHandler";
 
 export const checkLogin = (req: Request, res: Response, next: NextFunction) => {
   const schema = Joi.object({

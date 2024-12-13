@@ -1,10 +1,10 @@
 import config from "config";
-import { HTTP400Error, HTTP404Error } from "../../utils/httpErrors";
-import { Utilities } from "../../utils/Utilities";
-import { MESSAGES } from "../../constants/messages";
+import { HTTP400Error, HTTP404Error } from "../../../utils/httpErrors";
+import { Utilities } from "../../../utils/Utilities";
+import { MESSAGES } from "../../../constants/messages";
 import mongoose from "mongoose";
-import { PartnerModel } from "../../db/partner";
-import { PartnerLocationModel } from "../../db/partnerLocations";
+import { PartnerModel } from "../../../db/partner";
+import { PartnerLocationModel } from "../../../db/partnerLocations";
 
 export const editPartnerProfile = async (partnerId: string, bodyData: any, files: any, next: any) => {
   try {

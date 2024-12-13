@@ -9,8 +9,9 @@ const routes_3 = __importDefault(require("./adminWeb/wellnessTypes/routes"));
 const routes_4 = __importDefault(require("./adminWeb/services/routes"));
 const routes_5 = __importDefault(require("./adminWeb/subServices/routes"));
 const routes_6 = __importDefault(require("./adminWeb/partners/routes"));
-const routes_7 = __importDefault(require("./partner/routes"));
+const routes_7 = __importDefault(require("./partner/profile/routes"));
 const routes_8 = __importDefault(require("./adminWeb/company/routes"));
+const routes_9 = __importDefault(require("./partner/classes/routes"));
 exports.default = [
     ...routes_1.default,
     ...routes_2.default,
@@ -19,6 +20,7 @@ exports.default = [
     ...routes_5.default,
     ...routes_6.default,
     ...routes_7.default,
-    ...routes_8.default
+    ...routes_8.default,
+    ...routes_9.default
 ];
 //# sourceMappingURL=index.js.map
