@@ -46,7 +46,7 @@ export default [
     path: userPathURL + '/wellnessTypes', 
     method: "get",
     handler: [
-      checkAuthenticate,
+      // checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await getAllWellnessTypes(req.query, next);
         res.status(200).send(result);
