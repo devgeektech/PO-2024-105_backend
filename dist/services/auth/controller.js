@@ -283,6 +283,8 @@ const partnerSignup = (bodyData, next) => __awaiter(void 0, void 0, void 0, func
         bodyData['otpVerified'] = false;
         bodyData['otpExipredAt'] = (0, moment_1.default)().add(10, "m");
         let result = yield partner_1.PartnerModel.create(bodyData);
+        // let mailData = await MailerUtilities.sendEmail(bodyData.email, bodyData.name)
+        // console.log('"mailData +++++ ', mailData);
         return Utilities_1.Utilities.sendResponsData({
             code: 200,
             message: messages_1.MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
@@ -382,12 +384,13 @@ const partnerAddWithLocation = (bodyData, next) => __awaiter(void 0, void 0, voi
                 address: location.address,
                 city: location.city,
                 state: location.state,
+                zipCode: location.zipCode,
                 phone: location.phone,
                 images: location.images,
                 services: bodyData.services,
-                date: new Date(location.date),
-                startTime: location.startTime, // 09:00
-                endTime: location.endTime, // 03:00
+                date: location.date ? new Date(location.date) : null,
+                startTime: location.startTime || '', // 09:00
+                endTime: location.endTime || '', // 03:00
                 googleBussinessPageLink: location.googleBussinessPageLink,
             });
         });

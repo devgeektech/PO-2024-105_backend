@@ -73,5 +73,8 @@
       "NAME": "Narender",
       "EMAIL": "narender@geekinformatic.com"
     }
+  },
+  "MAILERSEND": {
+    "API_KEY": "mlsn.0e1f31065835d992c8a71d76ca7a865929883cf86ef30a414afe1d3935742281"
   }
 }

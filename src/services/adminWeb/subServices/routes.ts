@@ -29,7 +29,7 @@ export default [
     path: userPathURL + "/subservices",
     method: "get",
     handler: [
-      checkAuthenticate,
+      // checkAuthenticate,
       async (req: Request, res: Response, next: NextFunction) => {
         const result = await getAllSubServices(req.query, next);
         res.status(200).send(result);

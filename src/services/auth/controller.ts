@@ -282,6 +282,11 @@ export const partnerSignup = async (bodyData: any, next: any) => {
     bodyData['otpExipredAt'] = moment().add(10, "m");
     let result = await PartnerModel.create(bodyData);
 
+    // let mailData = await MailerUtilities.sendEmail(bodyData.email, bodyData.name)
+    // console.log('"mailData +++++ ', mailData);
+    
+
+
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.PARTNER.VERIFICATION_CODE_SEND,
@@ -399,12 +404,13 @@ export const partnerAddWithLocation = async (bodyData: any, next: any) => {
         address: location.address,
         city: location.city,
         state: location.state,
+        zipCode: location.zipCode,
         phone: location.phone,
         images: location.images,
         services: bodyData.services,
-        date: new Date(location.date),
-        startTime: location.startTime, // 09:00
-        endTime: location.endTime, // 03:00
+        date: location.date ? new Date(location.date) : null,
+        startTime: location.startTime || '', // 09:00
+        endTime: location.endTime || '', // 03:00
         googleBussinessPageLink: location.googleBussinessPageLink,
       });
     });
