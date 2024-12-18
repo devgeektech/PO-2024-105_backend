@@ -67,7 +67,8 @@ const partnerSchema = new mongoose.Schema({
   },
   locations: [
     {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "partnerlocation"
     }
   ],
   token:{

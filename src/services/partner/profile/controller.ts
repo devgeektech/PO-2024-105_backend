@@ -75,3 +75,68 @@ export const editPartnerProfile = async (partnerId: string, bodyData: any, files
     next(error);
   }
 };
+
+export const getPartnerByLocation = async (locationId: string, next: any) => {
+  try {
+
+    if (!locationId) {
+      throw new Error("Location ID is required");
+    }
+
+    let aggregateQuery = [
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(locationId),
+          isDeleted: false,
+        },
+      },
+      {
+        $lookup: {
+          from: "partners",
+          localField: "partnerId",
+          foreignField: "_id",
+          as: "partnerDetails",
+        },
+      },
+      {
+        $unwind: {
+          path: "$partnerDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ]
+
+    const location = await PartnerLocationModel.aggregate(aggregateQuery);
+
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.ADMIN.PARTNER_FETCHED,
+      data: location[0]? location[0]: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const getPartnerAllLocations = async (partnerId: string, next: any) => {
+  try{
+    if (!partnerId) {
+      throw new Error("Location ID is required");
+    }
+
+    const locations = await PartnerModel.findById(
+      partnerId, 
+      { locations: 1, _id: 0 } 
+    ).populate("locations")
+
+    return Utilities.sendResponsData({
+      code: 200,
+      message: MESSAGES.PARTNER.LOCATIONS_FETCHED,
+      data: locations,
+    });
+  }catch (error) {
+    next(error);
+  }
+  
+}
