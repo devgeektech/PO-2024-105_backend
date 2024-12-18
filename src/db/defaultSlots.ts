@@ -14,4 +14,4 @@ const defaultSlotSchema = new mongoose.Schema({
   ],
 });
 
-export const defaultSlotsModel = mongoose.model("defaultSlots", defaultSlotSchema);
+export const defaultSlotsModel = mongoose.model("defaultslots", defaultSlotSchema);
