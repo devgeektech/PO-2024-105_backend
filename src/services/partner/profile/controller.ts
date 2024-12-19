@@ -104,6 +104,14 @@ export const getPartnerByLocation = async (locationId: string, next: any) => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      {
+        $lookup: {
+          from: "services", // The collection name for services
+          localField: "services", // The field in locations referencing `services`
+          foreignField: "_id", // The field in the `services` collection to match
+          as: "services" // The name of the array to store the populated services
+        }
+      },
     ]
 
     const location = await PartnerLocationModel.aggregate(aggregateQuery);
@@ -124,16 +132,47 @@ export const getPartnerAllLocations = async (partnerId: string, next: any) => {
     if (!partnerId) {
       throw new Error("Location ID is required");
     }
-
-    const locations = await PartnerModel.findById(
-      partnerId, 
-      { locations: 1, _id: 0 } 
-    ).populate("locations")
+    const locations = await PartnerModel.aggregate([
+      {
+        $match: { _id:new mongoose.Types.ObjectId(partnerId) } // Match the partner by ID
+      },
+      {
+        $project: { locations: 1, _id: 0 } // Include only the `locations` field
+      },
+      {
+        $lookup: {
+          from: "partnerlocations", // The collection name for locations
+          localField: "locations", // The field in PartnerModel referencing `locations`
+          foreignField: "_id", // The field in the `partnerlocations` collection to match
+          as: "locations" // The name of the array to store the populated data
+        }
+      },
+      {
+        $unwind: { path: "$locations", preserveNullAndEmptyArrays: true } // Unwind the locations array
+      },
+      {
+        $lookup: {
+          from: "services", // The collection name for services
+          localField: "locations.services", // The field in locations referencing `services`
+          foreignField: "_id", // The field in the `services` collection to match
+          as: "locations.services" // The name of the array to store the populated services
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          locations: { $push: "$locations" } // Re-group the locations into an array
+        }
+      },
+      {
+        $project: { _id: 0, locations: 1 } // Final projection
+      }
+    ]);
 
     return Utilities.sendResponsData({
       code: 200,
       message: MESSAGES.PARTNER.LOCATIONS_FETCHED,
-      data: locations,
+      data: locations[0]?locations[0]:[],
     });
   }catch (error) {
     next(error);
