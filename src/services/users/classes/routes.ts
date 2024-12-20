@@ -1,48 +1,12 @@
 import { NextFunction, Request, Response } from "express";
 import config from "config";
 import { checkAuthenticate } from "./middleware/check";
-import { createClass, editClass, getAllClasses, getClassById } from "./controller";
+import { getAllClasses, getClassById } from "./controller";
 const basePath = config.get("BASE_PATH");
-const userPath = "partner";
+const userPath = "user";
 const userPathURL = basePath + userPath;
 
 export default [
-  // Route for add a class
-  {
-    path: userPathURL + "/addClass",
-    method: "post",
-    handler: [
-      checkAuthenticate,
-      async (req: Request, res: Response, next: NextFunction) => {
-        const result = await createClass(
-          req.get("Authorization"),
-          req.body,
-          req.file,
-          next
-        );
-        res.status(200).send(result);
-      },
-    ],
-  },
-
-  // Route for editing a class
-  {
-    path: userPathURL + "/editClass/:id",
-    method: "put",
-    handler: [
-      checkAuthenticate,
-      async (req: Request, res: Response, next: NextFunction) => {
-        const result = await editClass(
-          req.get("Authorization"),
-          req.params.id,
-          req.body,
-          req.file,
-          next
-        );
-        res.status(200).send(result);
-      },
-    ],
-  },
   // Route for Fetch classes
   {
     path: userPathURL + "/classes",
@@ -55,6 +19,7 @@ export default [
       },
     ],
   },
+
   // Route to Fetch specific class
   {
     path: userPathURL + "/class/:id",
