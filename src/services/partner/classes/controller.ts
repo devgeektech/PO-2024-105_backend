@@ -89,9 +89,7 @@ export const getAllClasses = async (token: any, queryData: any, next: any) => {
     const decoded: any = await Utilities.getDecoded(token);
     let skip = parseInt(queryData.skip) || 0;
     let limit = parseInt(queryData.limit) || 10;
-    let sortOrder: any = queryData.sortOrder?.toLowerCase() === 'dateasc' ? { createdAt: 1 } : queryData.sortOrder?.toLowerCase() === 'namedesc' ? { className: 1 } : queryData.sortOrder?.toLowerCase() === 'nameasc' ? { className: -1 } : { createdAt: -1 }
-
-    console.log("sortOrder >>>>>> ", sortOrder);
+    let sortOrder: any = queryData.sortOrder === 'oldToNew' ? { createdAt: 1 } : queryData.sortOrder === 'aToZ' ? { className: 1 } : queryData.sortOrder === 'zToA' ? { className: -1 } : { createdAt: -1 }
 
 
     const matchQuery: any = [
