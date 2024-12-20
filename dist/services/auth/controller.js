@@ -596,7 +596,9 @@ const partnerChangePassword = (token, bodyData, next) => __awaiter(void 0, void 
     try {
         const { oldPassword, newPassword } = bodyData;
         const decoded = yield Utilities_1.Utilities.getDecoded(token);
-        let partner = yield user_1.UserModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
+        console.log('decoded >>>>>>>> ', decoded);
+        let partner = yield partner_1.PartnerModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
+        console.log("partner ===== ", partner);
         if (partner) {
             const match = yield Utilities_1.Utilities.VerifyPassword(oldPassword, partner.password);
             if (match) {

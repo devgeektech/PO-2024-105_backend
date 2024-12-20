@@ -3,13 +3,13 @@ import config from "config";
 import { checkAuthenticate } from "./middleware/check";
 import { createClass, editClass, getAllClasses, getClassById } from "./controller";
 const basePath = config.get("BASE_PATH");
-const userPath = "partner";
-const userPathURL = basePath + userPath;
+const partnerPath = "partner";
+const partnerPathURL = basePath + partnerPath;
 
 export default [
   // Route for add a class
   {
-    path: userPathURL + "/addClass/",
+    path: partnerPathURL + "/addClass",
     method: "post",
     handler: [
       checkAuthenticate,
@@ -27,7 +27,7 @@ export default [
 
   // Route for editing a class
   {
-    path: userPathURL + "/editClass/:id",
+    path: partnerPathURL + "/editClass/:id",
     method: "put",
     handler: [
       checkAuthenticate,
@@ -43,9 +43,10 @@ export default [
       },
     ],
   },
+  
   // Route for Fetch classes
   {
-    path: userPathURL + "/classes",
+    path: partnerPathURL + "/classes",
     method: "get",
     handler: [
       checkAuthenticate,
@@ -55,9 +56,10 @@ export default [
       },
     ],
   },
+
   // Route to Fetch specific class
   {
-    path: userPathURL + "/class/:id",
+    path: partnerPathURL + "/class/:id",
     method: "get",
     handler: [
       checkAuthenticate,
