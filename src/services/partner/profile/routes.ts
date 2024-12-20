@@ -16,7 +16,7 @@ export default [
         const result = await editPartnerProfile(
           req.params.id,
           req.body,
-          req.files,
+          req,
           next
         );
         res.status(200).send(result);
