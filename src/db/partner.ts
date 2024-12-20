@@ -58,6 +58,10 @@ const partnerSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  checkinType: {
+    type: String,
+    default: '',
+  },
   isGoogleVerified: {
     type: Boolean,
     default: false
@@ -67,7 +71,8 @@ const partnerSchema = new mongoose.Schema({
   },
   locations: [
     {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "partnerlocation"
     }
   ],
   token:{

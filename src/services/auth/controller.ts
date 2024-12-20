@@ -651,8 +651,11 @@ export const partnerChangePassword = async (token: any, bodyData: any, next: any
   try {
     const { oldPassword, newPassword } = bodyData;
     const decoded: any = await Utilities.getDecoded(token);
-    let partner: any = await UserModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
-
+    console.log('decoded >>>>>>>> ', decoded);
+    
+    let partner: any = await PartnerModel.findOne({ _id: new mongoose.Types.ObjectId(decoded.id), isDeleted: false });
+    console.log("partner ===== ", partner);
+    
     if (partner) {
       const match = await Utilities.VerifyPassword(oldPassword, partner.password);
       if (match) {

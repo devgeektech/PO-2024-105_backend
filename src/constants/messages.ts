@@ -75,6 +75,7 @@ export const MESSAGES = {
       CLASS_UPDATED: "The class was successfully updated",
       CLASSES_FETCHED: "The list of classes has been successfully fetched",
       INVALID_ID: "Invalid Class Id",
-      CLASS_FETCHED: "The class has been successfully fetched"
+      CLASS_FETCHED: "The class has been successfully fetched",
+      LOCATIONS_FETCHED: "The locations has been successfully fetched"
     }
   }

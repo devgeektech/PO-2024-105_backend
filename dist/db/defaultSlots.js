@@ -38,5 +38,5 @@ const defaultSlotSchema = new mongoose.Schema({
         },
     ],
 });
-exports.defaultSlotsModel = mongoose.model("defaultSlots", defaultSlotSchema);
+exports.defaultSlotsModel = mongoose.model("defaultslots", defaultSlotSchema);
 //# sourceMappingURL=defaultSlots.js.map
