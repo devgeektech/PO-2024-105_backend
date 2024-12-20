@@ -12,7 +12,6 @@ export const createClass = async (token: any, bodyData: any, file: any, next: an
 
     let video = '';
     if(file) {
-      // aws code 
       video = file.filename
     }
 

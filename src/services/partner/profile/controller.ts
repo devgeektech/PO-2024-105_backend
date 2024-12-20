@@ -6,9 +6,10 @@ import mongoose from "mongoose";
 import { PartnerModel } from "../../../db/partner";
 import { PartnerLocationModel } from "../../../db/partnerLocations";
 
-export const editPartnerProfile = async (partnerId: string, bodyData: any, files: any, next: any) => {
+export const editPartnerProfile = async (partnerId: string, bodyData: any, req: any, next: any) => {
   try {
-    // Validate if partner exists
+    let files = req.files;
+
     let locationId = bodyData.locationId;
 
     const partner = await PartnerModel.findOne({ _id: new mongoose.Types.ObjectId(partnerId), isDeleted: false });
@@ -22,22 +23,24 @@ export const editPartnerProfile = async (partnerId: string, bodyData: any, files
     }
 
     let images:any = [];
-    let profile: any = '';
+    if(bodyData.images && bodyData.images.length>0){
+      images = [...bodyData.images]
+    }
+    let image: any = '';
     if (files && files.length) {
       files.forEach((file:any, index:any) => {
-        if (index === 0) {
-          profile = file.filename;
-        } else {
+         if (file.fieldname === 'image') {
+           image = file.filename;
+         } else {
           images.push(file.filename);
         }
       });
     }
 
-    // Update partner data
     const updatedPartnerData = {
       businessName: bodyData.businessName || partner.businessName,
       description : bodyData.description ||  partner.description,
-      image: profile || partner.image,
+      image: image || partner.image,
     };
     await PartnerModel.findByIdAndUpdate(partnerId, updatedPartnerData, { new: true });
 
