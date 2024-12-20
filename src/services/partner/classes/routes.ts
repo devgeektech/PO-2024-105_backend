@@ -46,7 +46,7 @@ export default [
   
   // Route for Fetch classes
   {
-    path: partnerPathURL + "/classes",
+    path: partnerPathURL + "/allClass",
     method: "get",
     handler: [
       checkAuthenticate,

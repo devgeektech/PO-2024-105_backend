@@ -23,7 +23,6 @@ const partnerPath = '/partner/';
 const memberPathURL = currentPath + memberPath;
 const adminPathURL = currentPath + adminPath;
 const partnerPathURL = currentPath + partnerPath;
-console.log('partnerPathURL ===== ', partnerPathURL);
 exports.default = [
     //***********************   ADMIN   *************************//
     //  login  //

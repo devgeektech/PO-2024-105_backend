@@ -11,7 +11,7 @@ export const createClass = async (token: any, bodyData: any, file: any, next: an
     const decoded: any = await Utilities.getDecoded(token);
 
     let video = '';
-    if(file) {
+    if (file) {
       video = file.filename
     }
 
@@ -84,134 +84,99 @@ export const editClass = async (token: any, classId: string, bodyData: any, file
   }
 };
 
-export const getAllClasses = async (token: any, query: any, next: any) => {
+export const getAllClasses = async (token: any, queryData: any, next: any) => {
   try {
-    let skip = parseInt(query.skip) || 0;
-    let limit = parseInt(query.limit) || 10;
-    let sortOrder: any = query.sortOrder === 'desc' ? -1 : 1;
-    const filters: any = [{ isDeleted: false }];
+    const decoded: any = await Utilities.getDecoded(token);
+    let skip = parseInt(queryData.skip) || 0;
+    let limit = parseInt(queryData.limit) || 10;
+    let sortOrder: any = queryData.sortOrder?.toLowerCase() === 'dateasc' ? { createdAt: 1 } : queryData.sortOrder?.toLowerCase() === 'namedesc' ? { className: 1 } : queryData.sortOrder?.toLowerCase() === 'nameasc' ? { className: -1 } : { createdAt: -1 }
 
-    if (query.className) {
-      filters.push({ className: { $regex: query.className, $options: 'i' } });
-    }
-    if (query.partnerName) {
-      filters.push({ 'partnerDetails.name': { $regex: query.partnerName, $options: 'i' } });
-    }
-    if (query.zipCode) {
-      filters.push({ 'partnerLocation.zipCode': { $regex: query.zipCode, $options: 'i' } });
-    }
-    if (query.city) {
-      filters.push({ 'partnerLocation.city': { $regex: query.city, $options: 'i' } });
-    }
-    if (query.address) {
-      filters.push({ 'partnerLocation.address': { $regex: query.address, $options: 'i' } });
-    }
-    if(query.services){
-      query.services = JSON.parse(query.services)
-      if (Array.isArray(query.services)) {
-        const serviceIds = query.services.map((id: string) => new mongoose.Types.ObjectId(id));
-        filters.push({ 'service._id': { $in: serviceIds } });
-      }
+    console.log("sortOrder >>>>>> ", sortOrder);
+
+
+    const matchQuery: any = [
+      { partnerId: new mongoose.Types.ObjectId(decoded.id) },
+      { isDeleted: false },
+      { partnerLocation: new mongoose.Types.ObjectId(queryData.locationId) },
+    ];
+    if (queryData.status) {
+      matchQuery.push({ status: queryData.status.toLowerCase() });
     }
 
-    const geoNearStage:any = [];
-    if (query.latitude && query.longitude) {
-      const latitude = parseFloat(query.latitude);
-      const longitude = parseFloat(query.longitude);
-      const coordinates = [longitude, latitude];
-
-      geoNearStage.push({
-        $geoNear: {
-          near: { type: "Point", coordinates: coordinates },
-          distanceField: "distance",
-          spherical: true,
-          key: "partnerLocation.location",
-          maxDistance: 10 * 1000 // 10 km in meters
-        }
-      });
-    }
-
-    if (query.date) {
-      const date = new Date(query.date);
-      const startOfDay = new Date(date.setHours(0, 0, 0, 0));
-      const endOfDay = new Date(date.setHours(23, 59, 59, 999));
-
-      filters.push({
-        $or: [
-          {
-            createdAt: { $gte: startOfDay.toISOString(), $lte: endOfDay.toISOString() },
-          },
-          {
-            createdAt: { $gte: startOfDay.toISOString(), $lte: endOfDay.toISOString() },
-          }
-        ]
-      });
-    }
-
-    let aggregateQuery = [
-      ...geoNearStage,
+    const result = await classModel.aggregate([
+      // Match initial conditions
       {
-        $lookup: {
-          from: 'partnerlocations', 
-          localField: 'partnerLocation',
-          foreignField: '_id',
-          as: 'partnerLocation'
-        }
+        $match: { $and: matchQuery },
       },
+      // Lookup services collection
       {
         $lookup: {
-          from: 'partners', 
-          localField: 'partnerId',
-          foreignField: '_id',
-          as: 'partnerDetails'
-        }
-      },
-      {
-        $lookup: {
-          from: 'services',
+          from: 'services', // Name of the services collection
           localField: 'serviceId',
           foreignField: '_id',
-          as: 'service',
+          as: 'services',
+        },
+      },
+      // Unwind services array to flatten it
+      {
+        $unwind: {
+          path: '$services',
+          preserveNullAndEmptyArrays: true, // Keeps documents without matching services
+        },
+      },
+      // Match based on search in services
+      ...(queryData.search
+        ? [
+          {
+            $match: {
+              $or: [
+                { className: new RegExp(queryData.search, 'i') },
+                { classType: new RegExp(queryData.search, 'i') },
+                { 'services.name': new RegExp(queryData.search, 'i') },
+                { 'services.description': new RegExp(queryData.search, 'i') },
+              ],
+            },
+          },
+        ]
+        : []),
+      // Project the desired fields
+      {
+        $project: {
+          _id: 1,
+          className: 1,
+          classStatus: 1,
+          description: 1,
+          classType: 1,
+          startTime: 1,
+          endTime: 1,
+          days: 1,
+          maxBooking: 1,
+          allowCancel: 1,
+          cancellationUpto: 1,
+          status: 1,
+          images: 1,
+          video: 1,
+          partnerId: 1,
+          partnerLocation: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          'services.name': 1, // Include relevant fields from services
+          'services.description': 1,
         },
       },
       {
-        $unwind: {
-          path: '$service',
-          preserveNullAndEmptyArrays: false
-        }
+        $sort: sortOrder
       },
-      {
-        $unwind: {
-          path: '$partnerDetails',
-          preserveNullAndEmptyArrays: false
-        }
-      },
-      {
-        $unwind: {
-          path: '$partnerLocation',
-          preserveNullAndEmptyArrays: false
-        }
-      },
-      {
-        $match: { $and: filters }
-      },
-      {
-        $sort: {
-          createdAt: sortOrder
-        }
-      },   
       {
         $facet: {
           totalRecords: [{ $count: "count" }],
           paginatedResults: [
             { $skip: skip },
             { $limit: limit },
-          ], 
+          ],
         }
       }
-    ]
-
-    const result = await classModel.aggregate(aggregateQuery);
+    ]);
 
     const totalRecord = result[0]?.totalRecords?.[0]?.count || 0;
     const classes = result[0]?.paginatedResults || [];
